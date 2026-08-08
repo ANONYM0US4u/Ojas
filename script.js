@@ -599,7 +599,10 @@
     $("#consult-pay-tag").textContent = label + " Consult";
     $("#c-name").value = ""; $("#c-age").value = ""; $("#c-phone").value = "";
     $("#c-profession").value = ""; $("#c-city").value = "";
-    $$(".seg", $("#c-problem")).forEach((b) => b.classList.remove("active"));
+    $$("#c-problem .cbox").forEach((b) => { b.checked = false; });
+    $("#c-other").value = "";
+    $("#c-other-field").hidden = true;
+    $$("#c-duration .seg").forEach((b) => b.classList.remove("active"));
     $("#consult-err").hidden = true;
     consultSteps.forEach((s) => s.classList.toggle("show", s.dataset.consultStep === "details"));
     consultModal.classList.add("show");
@@ -611,9 +614,15 @@
     consultModal.setAttribute("aria-hidden", "true");
   }
 
-  /* problem segmented */
-  $$(".seg", $("#c-problem")).forEach((b) => b.addEventListener("click", () => {
-    $$(".seg", $("#c-problem")).forEach((x) => x.classList.remove("active"));
+  /* problem checkboxes (+ "Other" free-text) & duration
+     single-select */
+  $$("#c-problem .cbox").forEach((b) => b.addEventListener("change", () => {
+    const other = b.value === "Other";
+    $("#c-other-field").hidden = !(other && b.checked);
+    if (other && b.checked) $("#c-other").focus();
+  }));
+  $$("#c-duration .seg").forEach((b) => b.addEventListener("click", () => {
+    $$("#c-duration .seg").forEach((x) => x.classList.remove("active"));
     b.classList.add("active");
   }));
 
@@ -624,11 +633,12 @@
     const phone = $("#c-phone").value.trim();
     const profession = $("#c-profession").value.trim();
     const city = $("#c-city").value.trim();
-    const concernBtn = $(".seg.active", $("#c-problem"));
+    const concernBoxes = $$("#c-problem .cbox");
+    const selected = concernBoxes.filter((b) => b.checked);
     const err = $("#consult-err");
 
-    if (!name || !age || !phone || !profession || !city || !concernBtn) {
-      err.textContent = "Please fill all fields and select your concern.";
+    if (!name || !age || !phone || !profession || !city || selected.length === 0) {
+      err.textContent = "Please fill all fields and select at least one concern.";
       err.hidden = false;
       return;
     }
@@ -643,13 +653,28 @@
       err.hidden = false;
       return;
     }
+    const durBtn = $(".seg.active", $("#c-duration"));
+    const otherText = ($("#c-other").value || "").trim();
+    const worried = selected.some((b) => b.value === "Other");
+    if (!durBtn) {
+      err.textContent = "Please select how long this has been bothering you.";
+      err.hidden = false;
+      return;
+    }
+    if (worried && !otherText) {
+      err.textContent = "Please tell us your concern in a few words.";
+      err.hidden = false;
+      return;
+    }
     err.hidden = true;
 
     consultCtx = Object.assign(consultCtx, {
-      name, age: n, phone, profession, city, concern: concernBtn.dataset.v
+      name, age: n, phone, profession, city,
+      concern: selected.map((b) => b.value === "Other" ? otherText : b.value).join(", "),
+      duration: durBtn.dataset.v
     });
     $("#consult-summary-line").textContent =
-      consultCtx.name + " · " + consultCtx.age + " yrs · " + consultCtx.city + " · " + consultCtx.concern;
+      consultCtx.name + " · " + consultCtx.age + " yrs · " + consultCtx.city + " · " + consultCtx.concern + " (" + consultCtx.duration + ")";
     $("#consult-amount").textContent = "₹" + CONSULT_FEE;
     consultSteps.forEach((s) => s.classList.toggle("show", s.dataset.consultStep === "payment"));
   });
@@ -714,7 +739,7 @@
                 amount: CONSULT_FEE,
                 booking: {
                   name: c.name, age: c.age, phone: c.phone, city: c.city,
-                  profession: c.profession, concern: c.concern, pillar: pillarNames[c.pillar]
+                  profession: c.profession, concern: c.concern, duration: c.duration, pillar: pillarNames[c.pillar]
                 }
               });
               payoutSuccess = v.wa || [];
@@ -816,7 +841,7 @@
     const c = consultCtx;
     return [
       { to: "Patient (" + c.phone + ")", body: "OJAS — your ₹" + CONSULT_FEE + " consultation is CONFIRMED. Call on " + dateLabel() + " at " + selectedSlot + ". A reminder will follow tomorrow. OJAS Care" },
-      { to: "Care team", body: "NEW OJAS CONSULT — " + c.name + " · " + c.age + " yrs · " + c.city + " · " + c.profession + " · Concern: " + c.concern + " · Phone +91 " + c.phone + " · Fee ₹" + CONSULT_FEE + " PAID · Call on " + dateLabel() + "." },
+      { to: "Care team", body: "NEW OJAS CONSULT — " + c.name + " · " + c.age + " yrs · " + c.city + " · " + c.profession + " · Concern: " + c.concern + " (" + c.duration + ") · Phone +91 " + c.phone + " · Fee ₹" + CONSULT_FEE + " PAID · Call on " + dateLabel() + "." },
       { to: "Care team", body: "Time chosen by " + c.name + " for " + dateLabel() + ": " + selectedSlot + "." }
     ];
   }

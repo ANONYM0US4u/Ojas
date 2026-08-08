@@ -144,6 +144,7 @@ function buildClinicMessage(rec) {
   if (b.profession) L.push("Profession: " + b.profession);
   if (b.phone) L.push("WhatsApp: +91 " + b.phone);
   if (b.concern) L.push("Concern: " + b.concern);
+  if (b.duration) L.push("Duration: " + b.duration);
   if (b.pillar) L.push("Consult: " + b.pillar);
   if (b.date) L.push("Scheduled: " + b.date + (b.slot ? " at " + b.slot : ""));
   if (b.plan) L.push("Program: " + b.plan);

@@ -462,6 +462,10 @@ button { font-family: inherit; cursor: pointer; }
 .quiz-q { margin-bottom: 30px; }
 .quiz-q-label { font-weight: 600; color: var(--white); font-size: 15px; margin-bottom: 12px; }
 .seg-group { display: flex; gap: 10px; flex-wrap: wrap; }
+.consult-choices .check-row { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; transition: border-color 0.18s ease, background 0.18s ease; }
+.consult-choices .check-row:hover { border-color: var(--gold); }
+.consult-choices .check-row:has(input:checked) { background: rgba(212,175,55,0.08); border-color: var(--gold); }
+.other-field { margin-top: 4px; }
 .seg {
   flex: 1 1 auto; min-width: 110px; background: var(--midnight); color: var(--body);
   border: 1px solid var(--line); border-radius: 10px; padding: 13px 12px;

@@ -947,10 +947,23 @@
 
       <div class="consult-q">
         <span class="consult-q-label">Your concern</span>
-        <div class="seg-group seg-problem" id="c-problem">
-          <button type="button" class="seg" data-v="Erectile Dysfunction (ED)">ED</button>
-          <button type="button" class="seg" data-v="Premature Ejaculation (PE)">PME</button>
-          <button type="button" class="seg" data-v="Other concern">Other</button>
+        <div class="consult-choices" id="c-problem">
+          <label class="check-row"><input type="checkbox" class="cbox" value="Erectile Dysfunction (ED)"><span>ED — Erectile Dysfunction</span></label>
+          <label class="check-row"><input type="checkbox" class="cbox" value="Premature Ejaculation (PE)"><span>PME — Premature Ejaculation</span></label>
+          <label class="check-row"><input type="checkbox" class="cbox" value="Other"><span>Other concern</span></label>
+        </div>
+        <label class="field other-field" id="c-other-field" hidden>
+          <span>Describe your concern</span>
+          <input type="text" id="c-other" placeholder="e.g. Low libido, anxiety, work stress…" autocomplete="off">
+        </label>
+      </div>
+
+      <div class="consult-q">
+        <span class="consult-q-label">How long has this problem bothered you?</span>
+        <div class="seg-group" id="c-duration">
+          <button type="button" class="seg" data-v="1-6 months">1–6 months</button>
+          <button type="button" class="seg" data-v="6-12 months">6–12 months</button>
+          <button type="button" class="seg" data-v="1 year+">1 year+</button>
         </div>
       </div>
 
