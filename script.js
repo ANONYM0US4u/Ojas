@@ -518,6 +518,11 @@
             },
             modal: { ondismiss: () => { checkoutBusy = false; btn.disabled = false; } }
           });
+          rzp.on("payment.failed", (resp) => {
+            checkoutBusy = false;
+            btn.disabled = false;
+            alert("Payment failed: " + ((resp.error && (resp.error.code || resp.error.description)) || "try again") + ". No amount was charged.");
+          });
           rzp.open();
         } catch (err) {
           console.error(err);
@@ -721,6 +726,10 @@
             resetPayBtn();
           },
           modal: { ondismiss: () => { resetPayBtn(); } }
+        });
+        rzp.on("payment.failed", (resp) => {
+          payErr("Payment failed: " + ((resp.error && (resp.error.code || resp.error.description)) || "try again") + ". No amount was charged.");
+          resetPayBtn();
         });
         rzp.open();
       } catch (err) {

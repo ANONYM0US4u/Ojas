@@ -199,6 +199,7 @@ async function handleApi(req, res, url) {
       return json(res, 200, { orderId: order.id, key: CFG.razorpayKey, amount, participant });
     } catch (e) {
       log("order-create error: " + e.message);
+      if (/401|403/.test(e.message)) return json(res, 401, { error: "Razorpay auth failed — check RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET" });
       return json(res, 502, { error: "order could not be created: " + e.message });
     }
   }
@@ -210,6 +211,10 @@ async function handleApi(req, res, url) {
     const orderId = String(body.orderId || "");
     const paymentId = String(body.paymentId || "");
     const signature = String(body.signature || "");
+
+    if (!orderId || !paymentId || !signature) {
+      return json(res, 400, { error: "missing fields (need orderId, paymentId, signature)" });
+    }
 
     let verified = false;
     if (rzPayable()) {
