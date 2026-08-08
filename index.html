@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="OJAS — Total Men's Vitality: Sleep, Gut, Mind & Performance. A unified multi-specialist clinical ecosystem.">
+<title>OJAS — Men's Health Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ══════════ DPDP CONSENT MODAL ══════════ -->
+<div class="modal-overlay" id="consent-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="consent-title">
+  <div class="modal-card">
+    <div class="modal-emblem">ॐ</div>
+    <h2 id="consent-title">Your privacy is protected under the DPDP Act, 2023</h2>
+    <p>OJAS collects only the health data required to build your personalised protocol. We never sell, share, or expose your information — all records are encrypted and processed under the Digital Personal Data Protection Act, 2023, and HIPAA-aligned safeguards.</p>
+    <ul class="consent-points">
+      <li>Consent is explicit, specific, and revocable at any time.</li>
+      <li>Data is used solely for your diagnosis, protocol, and discreet delivery.</li>
+      <li>Your name never appears on packaging, statements, or courier labels.</li>
+    </ul>
+    <label class="check-row">
+      <input type="checkbox" id="consent-dpdp">
+      <span>I consent to my health data being collected and processed for my treatment plan.</span>
+    </label>
+    <label class="check-row">
+      <input type="checkbox" id="consent-terms">
+      <span>I agree to the Terms of Care and Telemedicine Practice Guidelines.</span>
+    </label>
+    <button class="btn btn-gold btn-block" id="consent-accept" disabled>Enter OJAS</button>
+    <button class="btn-link" id="consent-decline">I do not consent — exit</button>
+  </div>
+</div>
+
+<!-- ══════════ HEADER / NAV ══════════ -->
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <a href="#/" class="brand" data-nav>
+      <span class="brand-mark">ॐ</span>
+      <span class="brand-text">OJAS<span class="brand-sub">Men's Health</span></span>
+    </a>
+    <nav class="site-nav" id="site-nav" aria-label="Primary">
+      <a href="#/" data-nav>Home</a>
+      <a href="#/science" data-nav>About &amp; Science</a>
+      <a href="#/diagnostic" data-nav>Diagnostic</a>
+      <a href="#/programs" data-nav>Programs</a>
+      <a href="#/panel" data-nav>Medical Panel</a>
+      <a href="#/diagnostic" class="btn btn-gold btn-sm" data-nav>Take the Assessment</a>
+    </nav>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ══════════ PAGE 1 — HOME ══════════ -->
+  <section class="page page-home" data-page="home">
+
+    <div class="hero">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="orb orb-gut"></div><div class="orb orb-mind"></div>
+        <div class="orb orb-sleep"></div><div class="orb orb-sexual"></div>
+      </div>
+      <div class="container hero-inner">
+        <p class="eyebrow">Men's Health — Vitality. Balance. Strength.</p>
+        <h1 class="hero-title">Total Men's Vitality:<br><em>Sleep, Gut, Mind &amp; Performance.</em></h1>
+        <p class="hero-sub">Ojas (ॐ) — reclaiming life force through a unified, multi-specialist clinical ecosystem. One assessment. One squad. One protocol that treats the root cause, not the symptom.</p>
+        <div class="hero-ctas">
+          <a href="#/diagnostic" class="btn btn-gold" data-nav>Take the 2-Min Health Assessment</a>
+          <a href="#/programs" class="btn btn-outline" data-nav>Explore Programs</a>
+        </div>
+        <div class="hero-proof">
+          <span><strong>6+</strong> Specialist Tracks</span>
+          <span class="divider">•</span>
+          <span><strong>100%</strong> Unbranded Delivery</span>
+          <span class="divider">•</span>
+          <span><strong>24h</strong> Squad Assignment</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="section trust-section">
+      <div class="container">
+        <h2 class="section-label">The OJAS Trust Shield</h2>
+        <div class="trust-grid">
+          <div class="trust-card">
+            <span class="trust-icon">🛡</span>
+            <h3>HIPAA Compliant</h3>
+            <p>Enterprise-grade encryption &amp; access controls on every patient record.</p>
+          </div>
+          <div class="trust-card">
+            <span class="trust-icon">🔒</span>
+            <h3>DPDP Act Privacy Shield</h3>
+            <p>Explicit consent, revocable anytime, under the DPDP Act, 2023.</p>
+          </div>
+          <div class="trust-card">
+            <span class="trust-icon">🏥</span>
+            <h3>ABDM Ready</h3>
+            <p>Ayushman Bharat Digital Mission aligned — your health records, portable.</p>
+          </div>
+          <div class="trust-card">
+            <span class="trust-icon">📦</span>
+            <h3>100% Unbranded Packaging</h3>
+            <p>Plain brown boxes. No logos, no labels, no questions. Ever.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section quadrant-section">
+      <div class="container">
+        <p class="eyebrow center">The 4-Quadrant Ecosystem</p>
+        <h2 class="section-title center">Four pillars. <em>One chain.</em></h2>
+        <p class="section-sub center">Your gut, mind, sleep and sexual health are not separate problems. They are one system — and they fall together. Hover a pillar to trace its connection to the others.</p>
+        <div class="quad-grid" id="quad-grid">
+          <button class="quad-card" data-pillar="gut" data-consult="gut" data-connections="sleep,sexual" aria-label="Book a gut health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Gut</h3>
+            <p>Dysbiosis drops serotonin — the master signal for mood <em>and</em> nocturnal repair.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+          <button class="quad-card" data-pillar="mind" data-consult="mind" data-connections="gut,sleep,sexual" aria-label="Book a mental health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Emotional</h3>
+            <p>Chronic stress raises cortisol, telling your body to postpone every recovery process.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+          <button class="quad-card" data-pillar="sleep" data-consult="sleep" data-connections="gut,mind,sexual" aria-label="Book a sleep health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Sleep</h3>
+            <p>Fragmented sleep shuts the window where most of your testosterone is built.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+          <button class="quad-card" data-pillar="sexual" data-consult="sexual" data-connections="gut,mind,sleep" aria-label="Book a sexual health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Sexual</h3>
+            <p>Performance pressure compounds physiology — anxiety spikes cortisol further.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+        </div>
+        <p class="quad-caption" id="quad-caption">Gut dysbiosis → serotonin drop → mood, sleep architecture, and nocturnal testosterone are all downstream of one root.</p>
+      </div>
+    </section>
+
+    <section class="section flow-section">
+      <div class="container">
+        <p class="eyebrow center">How OJAS Works</p>
+        <h2 class="section-title center">Your care, in three steps</h2>
+        <div class="flow-grid">
+          <div class="flow-step">
+            <span class="flow-num">01</span>
+            <h3>Digital Assessment</h3>
+            <p>A 2-minute, 4-pillar diagnostic maps your symptom domino chain — no heavy typing, no face-to-face gatekeeping.</p>
+          </div>
+          <div class="flow-step">
+            <span class="flow-num">02</span>
+            <h3>Multi-Specialist Squad Assignment</h3>
+            <p>An MD Andrologist, AYUSH practitioner and clinical psychologist are assigned to your single case — in under 24 hours.</p>
+          </div>
+          <div class="flow-step">
+            <span class="flow-num">03</span>
+            <h3>Personalized Protocol &amp; Discrete Delivery</h3>
+            <p>Your treatment plan ships in plain packaging, billed under a neutral descriptor. Nobody knows. Only you recover.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="container">
+        <h2>Your body is telling you something.<br>It's time to answer.</h2>
+        <p>2 minutes. 4 pillars. One root-cause map.</p>
+        <a href="#/diagnostic" class="btn btn-gold btn-lg" data-nav>Take the 2-Min Health Assessment</a>
+      </div>
+    </section>
+
+  </section>
+
+  <!-- ══════════ PAGE 2 — ABOUT US & THE SCIENCE ══════════ -->
+  <section class="page page-science" data-page="science">
+
+    <header class="page-hero">
+      <div class="container">
+        <p class="eyebrow">About Us &amp; The Science</p>
+        <h1>Beyond Quick Fixes:<br><em>The OJAS Science.</em></h1>
+        <p class="page-hero-sub">A single symptom is a smoke signal. OJAS follows it back to the fire — and treats the system, not the symptom.</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <p class="eyebrow center">The Meaning of OJAS</p>
+        <h2 class="section-title center">What Ojas (ॐ) actually is</h2>
+        <p class="section-sub center">In traditional medicine, <strong>Ojas</strong> is the distilled essence of vitality — the reserve your body draws on for endurance, immunity and repair. When Ojas is low, every system runs on a deficit.</p>
+        <div class="ojasm-grid">
+          <div class="ojasm-card">
+            <span class="ojasm-glyph">♨</span>
+            <h3>Vitality</h3>
+            <p>Energy, drive and libido — the lived experience of a body with reserves.</p>
+          </div>
+          <div class="ojasm-card">
+            <span class="ojasm-glyph">⛨</span>
+            <h3>Endurance</h3>
+            <p>Physical and mental stamina that survives stress without collapsing.</p>
+          </div>
+          <div class="ojasm-card">
+            <span class="ojasm-glyph">☯</span>
+            <h3>Immunity</h3>
+            <p>Recovery capacity — the body's ability to rebuild itself while you sleep.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Why treating symptoms in isolation leads to relapse:</strong>
+          <p>A pill for acidity ignores the stress that caused the acidity. A sleep pill ignores the gut that quieted your GABA. When you treat only what you can see, the root quietly rebuilds the symptom — and you're back in three months. OJAS treats the chain.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section domino-section">
+      <div class="container">
+        <p class="eyebrow center">The Domino Effect</p>
+        <h2 class="section-title center">How four separate complaints become one diagnosis</h2>
+        <div class="domino-chain" id="domino-chain">
+          <div class="domino-node d-gut" data-label="Gut Dysbiosis">
+            <span class="d-glyph">◉</span><span class="d-tag">Gut Dysbiosis</span>
+            <small>Serotonin pool drops</small>
+          </div>
+          <div class="domino-arrow">↓</div>
+          <div class="domino-node d-ser" data-label="Serotonin">
+            <span class="d-glyph">◉</span><span class="d-tag">Serotonin ↓</span>
+            <small>Mood, appetite &amp; sleep signals weaken</small>
+          </div>
+          <div class="domino-join">+</div>
+          <div class="domino-node d-stress" data-label="Stress">
+            <span class="d-glyph">◉</span><span class="d-tag">Chronic Stress</span>
+            <small>Cortisol stays elevated</small>
+          </div>
+          <div class="domino-arrow">↓</div>
+          <div class="domino-node d-cort" data-label="Cortisol">
+            <span class="d-glyph">◉</span><span class="d-tag">Cortisol ↑</span>
+            <small>Body suspends "non-essential" repair</small>
+          </div>
+          <div class="domino-arrow">→</div>
+          <div class="domino-node d-t" data-label="Testosterone">
+            <span class="d-glyph">◉</span><span class="d-tag">Nocturnal Testosterone Blocked</span>
+            <small>~70% of daily T is built during deep sleep</small>
+          </div>
+          <div class="domino-arrow">→</div>
+          <div class="domino-node d-sd" data-label="Sexual Dysfunction">
+            <span class="d-glyph">◉</span><span class="d-tag">Sexual Dysfunction</span>
+            <small>Weak stamina, low desire, performance anxiety</small>
+          </div>
+        </div>
+        <p class="domino-note">The gut is usually the first domino. That's why OJAS always starts there — and why your protocol never stops at the symptom.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <p class="eyebrow center">Clinical Squad Model</p>
+        <h2 class="section-title center">Three specialists. One case file. Zero silos.</h2>
+        <p class="section-sub center">Transparency into who is actually on your case — and how they collaborate on a single patient record.</p>
+        <div class="squad-grid">
+          <div class="squad-card">
+            <span class="squad-glyph">🩺</span>
+            <h3>MD Andrologist</h3>
+            <p>Owns the hormonal &amp; sexual health track — testosterone panels, libido protocols, performance medicine.</p>
+            <span class="squad-tag">Track Lead · Sexual</span>
+          </div>
+          <div class="squad-card">
+            <span class="squad-glyph">🌿</span>
+            <h3>AYUSH Practitioner</h3>
+            <p>Owns the gut &amp; constitutional track — digestion, metabolism, and Rasayana-style regenerative support.</p>
+            <span class="squad-tag">Track Lead · Gut</span>
+          </div>
+          <div class="squad-card">
+            <span class="squad-glyph">🧠</span>
+            <h3>Clinical Psychologist</h3>
+            <p>Owns the emotional track — stress, performance anxiety, sleep hygiene and behaviour change.</p>
+            <span class="squad-tag">Track Lead · Mind</span>
+          </div>
+        </div>
+        <div class="callout callout-gold">
+          <strong>How collaboration works:</strong>
+          <p>Every specialist sees the <em>same</em> shared case file. When the psychologist de-escalates stress, the Andrologist's testosterone protocol works better. When the gut heals, sleep deepens, and the whole chain re-equilibrates. Progress is reviewed weekly in a combined squad note — and you can read every entry.</p>
+        </div>
+      </div>
+    </section>
+
+  </section>
+
+  <!-- ══════════ PAGE 3 — DIAGNOSTIC TOOL ══════════ -->
+  <section class="page page-diagnostic" data-page="diagnostic">
+
+    <header class="page-hero page-hero-narrow">
+      <div class="container">
+        <p class="eyebrow center">4-Quadrant Diagnostic Tool</p>
+        <h1 class="center">Two minutes. Four pillars.<br><em>One root-cause map.</em></h1>
+        <p class="page-hero-sub center">No accounts. No heavy typing. Just honest answers — your matrix generates instantly.</p>
+      </div>
+    </header>
+
+    <div class="quiz-wrap">
+      <!-- Step 0: intro -->
+      <div class="quiz-screen quiz-intro" data-screen="intro">
+        <div class="quiz-card">
+          <span class="quiz-badge">Assessment</span>
+          <h2>Let's map your chain</h2>
+          <p>You'll answer 4 quick sections — Gut, Emotional, Sleep and Sexual. Everything stays private, consent is yours, and you can delete your data anytime.</p>
+          <ul class="quiz-facts">
+            <li>⏱ 2 minutes</li>
+            <li>🔒 DPDP Act, 2023 compliant</li>
+            <li>📊 Instant visual results</li>
+          </ul>
+          <button class="btn btn-gold btn-block" data-start-quiz>Begin Assessment</button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="quiz-progress" id="quiz-progress" hidden>
+        <div class="quiz-progress-track"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+        <div class="quiz-progress-labels">
+          <span class="qstep qs-gut">Gut</span><span class="qstep qs-mind">Emotional</span>
+          <span class="qstep qs-sleep">Sleep</span><span class="qstep qs-sexual">Sexual</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Gut -->
+      <div class="quiz-screen" data-screen="gut" hidden>
+        <div class="quiz-card">
+          <span class="quiz-badge badge-gut">Pillar 1 of 4 · Gut</span>
+          <h2>How does your gut behave?</h2>
+          <div class="quiz-q">
+            <p class="quiz-q-label">1. How often do you feel acidity or reflux after meals?</p>
+            <div class="seg-group" data-q="gut-acidity">
+              <button class="seg" data-v="0">Rarely</button>
+              <button class="seg" data-v="1">Weekly</button>
+              <button class="seg" data-v="2">Several times a week</button>
+              <button class="seg" data-v="3">Daily</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">2. How often do you feel bloated or heavy after eating?</p>
+            <div class="seg-group" data-q="gut-bloating">
+              <button class="seg" data-v="0">Rarely</button>
+              <button class="seg" data-v="1">Weekly</button>
+              <button class="seg" data-v="2">Several times a week</button>
+              <button class="seg" data-v="3">Daily</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">3. After a heavy meal, how long does the meal "sit" before digestion feels settled?</p>
+            <div class="seg-group" data-q="gut-digestion">
+              <button class="seg" data-v="0">Under an hour</button>
+              <button class="seg" data-v="1">1–2 hours</button>
+              <button class="seg" data-v="2">2–4 hours</button>
+              <button class="seg" data-v="3">Most of the day</button>
+            </div>
+          </div>
+          <div class="quiz-nav">
+            <button class="btn btn-outline" data-prev-step>Back</button>
+            <button class="btn btn-gold" data-next-step disabled>Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Emotional -->
+      <div class="quiz-screen" data-screen="mind" hidden>
+        <div class="quiz-card">
+          <span class="quiz-badge badge-mind">Pillar 2 of 4 · Emotional</span>
+          <h2>How heavy is your mental load?</h2>
+          <div class="quiz-q">
+            <p class="quiz-q-label">4. Professional burnout — how drained do you feel at the end of a workday?</p>
+            <input type="range" min="1" max="10" value="5" class="slider" data-q="mind-burnout">
+            <div class="slider-labels"><span>Refreshed</span><span class="slider-val" data-val-for="mind-burnout">5</span><span>Burned out</span></div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">5. How often does stress feel physically present (tight chest, tension, restlessness)?</p>
+            <input type="range" min="1" max="10" value="5" class="slider" data-q="mind-stress">
+            <div class="slider-labels"><span>Never</span><span class="slider-val" data-val-for="mind-stress">5</span><span>Constant</span></div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">6. Unprovoked irritability — how easily do small things set you off?</p>
+            <input type="range" min="1" max="10" value="5" class="slider" data-q="mind-irritability">
+            <div class="slider-labels"><span>Even-keeled</span><span class="slider-val" data-val-for="mind-irritability">5</span><span>Very short fuse</span></div>
+          </div>
+          <div class="quiz-nav">
+            <button class="btn btn-outline" data-prev-step>Back</button>
+            <button class="btn btn-gold" data-next-step>Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Sleep -->
+      <div class="quiz-screen" data-screen="sleep" hidden>
+        <div class="quiz-card">
+          <span class="quiz-badge badge-sleep">Pillar 3 of 4 · Sleep</span>
+          <h2>What does your night actually look like?</h2>
+          <div class="quiz-q">
+            <p class="quiz-q-label">7. Average sleep per night?</p>
+            <div class="seg-group" data-q="sleep-duration">
+              <button class="seg" data-v="0">7+ hours</button>
+              <button class="seg" data-v="1">6–7 hours</button>
+              <button class="seg" data-v="2">5–6 hours</button>
+              <button class="seg" data-v="3">Under 5 hours</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">8. How often do you wake up in the middle of the night?</p>
+            <div class="seg-group" data-q="sleep-interruptions">
+              <button class="seg" data-v="0">Rarely</button>
+              <button class="seg" data-v="1">1–2 nights a week</button>
+              <button class="seg" data-v="2">3–5 nights a week</button>
+              <button class="seg" data-v="3">Every night</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">9. How do you feel when you wake up?</p>
+            <div class="seg-group" data-q="sleep-fatigue">
+              <button class="seg" data-v="0">Refreshed</button>
+              <button class="seg" data-v="1">Slightly groggy</button>
+              <button class="seg" data-v="2">Mostly tired</button>
+              <button class="seg" data-v="3">Exhausted</button>
+            </div>
+          </div>
+          <div class="quiz-nav">
+            <button class="btn btn-outline" data-prev-step>Back</button>
+            <button class="btn btn-gold" data-next-step>Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Sexual -->
+      <div class="quiz-screen" data-screen="sexual" hidden>
+        <div class="quiz-card">
+          <span class="quiz-badge badge-sexual">Pillar 4 of 4 · Sexual</span>
+          <h2>Now, the fourth pillar.</h2>
+          <p class="quiz-private">Private by default — your answers are encrypted and never leave your case file.</p>
+          <div class="quiz-q">
+            <p class="quiz-q-label">10. Performance anxiety — how much does the fear of performance affect intimacy?</p>
+            <div class="seg-group" data-q="sexual-anxiety">
+              <button class="seg" data-v="0">Not at all</button>
+              <button class="seg" data-v="1">Occasionally</button>
+              <button class="seg" data-v="2">Often</button>
+              <button class="seg" data-v="3">Almost always</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">11. Stamina — how would you rate your physical endurance during intimacy?</p>
+            <div class="seg-group" data-q="sexual-stamina">
+              <button class="seg" data-v="0">Strong</button>
+              <button class="seg" data-v="1">Moderate</button>
+              <button class="seg" data-v="2">Below average</button>
+              <button class="seg" data-v="3">Weak</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <p class="quiz-q-label">12. Morning vitality — how is your morning erection / drive frequency?</p>
+            <div class="seg-group" data-q="sexual-morning">
+              <button class="seg" data-v="0">Strong, most days</button>
+              <button class="seg" data-v="1">Present, variable</button>
+              <button class="seg" data-v="2">Rare</button>
+              <button class="seg" data-v="3">Absent</button>
+            </div>
+          </div>
+          <div class="quiz-nav">
+            <button class="btn btn-outline" data-prev-step>Back</button>
+            <button class="btn btn-gold" data-submit-quiz>Submit &amp; Generate My Matrix</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Computing -->
+      <div class="quiz-screen" data-screen="computing" hidden>
+        <div class="quiz-card quiz-computing">
+          <div class="compute-ring"><span>ॐ</span></div>
+          <h2>Tracing your domino chain…</h2>
+          <p id="compute-status">Mapping gut → serotonin → cortisol → testosterone</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════ PAGE 3A — DYNAMIC DIAGNOSTIC RESULTS ══════════ -->
+  <section class="page page-results" data-page="results">
+
+    <header class="page-hero page-hero-narrow">
+      <div class="container">
+        <p class="eyebrow center">Your Diagnostic Matrix</p>
+        <h1 class="center">Your body's <em>domino chain</em>, visualised</h1>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container results-layout">
+        <div class="results-visual">
+          <div class="domino-graph" id="domino-graph">
+            <svg class="domino-svg" viewBox="0 0 1000 480" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 Z" class="arrow-marker"/>
+                </marker>
+              </defs>
+              <path class="edge e-gut-ser" d="M200,105 C200,150 200,160 200,195"/>
+              <path class="edge e-ser-t" d="M200,245 C200,300 340,325 460,330"/>
+              <path class="edge e-stress-cort" d="M800,105 C800,150 800,160 800,195"/>
+              <path class="edge e-cort-t" d="M800,245 C800,300 660,325 540,330"/>
+              <path class="edge e-t-sd" d="M500,375 C500,400 500,410 500,430"/>
+            </svg>
+            <div class="graph-node gn-gut" data-node="gut">
+              <span class="gn-icon">◉</span>
+              <span class="gn-label">Gut Dysbiosis</span>
+            </div>
+            <div class="graph-node gn-ser" data-node="serotonin">
+              <span class="gn-icon">↓</span>
+              <span class="gn-label">Serotonin ↓</span>
+            </div>
+            <div class="graph-node gn-stress" data-node="stress">
+              <span class="gn-icon">◉</span>
+              <span class="gn-label">Stress</span>
+            </div>
+            <div class="graph-node gn-cort" data-node="cortisol">
+              <span class="gn-icon">↑</span>
+              <span class="gn-label">Cortisol ↑</span>
+            </div>
+            <div class="graph-node gn-t" data-node="testosterone">
+              <span class="gn-icon">⚠</span>
+              <span class="gn-label">Nocturnal Testosterone Blocked</span>
+            </div>
+            <div class="graph-node gn-sd" data-node="sexual-dysfunction">
+              <span class="gn-icon">◌</span>
+              <span class="gn-label">Sexual Dysfunction</span>
+            </div>
+          </div>
+          <div class="pillar-bars" id="pillar-bars">
+            <div class="pbar" data-pillar="gut"><span class="pbar-name">Gut</span><div class="pbar-track"><div class="pbar-fill pf-gut"></div></div><span class="pbar-val" id="pval-gut">0</span></div>
+            <div class="pbar" data-pillar="mind"><span class="pbar-name">Emotional</span><div class="pbar-track"><div class="pbar-fill pf-mind"></div></div><span class="pbar-val" id="pval-mind">0</span></div>
+            <div class="pbar" data-pillar="sleep"><span class="pbar-name">Sleep</span><div class="pbar-track"><div class="pbar-fill pf-sleep"></div></div><span class="pbar-val" id="pval-sleep">0</span></div>
+            <div class="pbar" data-pillar="sexual"><span class="pbar-name">Sexual</span><div class="pbar-track"><div class="pbar-fill pf-sexual"></div></div><span class="pbar-val" id="pval-sexual">0</span></div>
+          </div>
+        </div>
+
+        <aside class="results-summary">
+          <span class="quiz-badge">Clinical Summary</span>
+          <h2 id="summary-headline">Your root-cause reading</h2>
+          <div id="summary-text"></div>
+          <div class="summary-cta">
+            <a href="#/programs" class="btn btn-gold btn-block" data-nav>Unlock My Custom Treatment Plan</a>
+            <button class="btn-link" data-restart-quiz>Retake assessment</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </section>
+
+  <!-- ══════════ PAGE 4 — PROGRAMS & TRANSPARENT PRICING ══════════ -->
+  <section class="page page-programs" data-page="programs">
+
+    <header class="page-hero page-hero-narrow">
+      <div class="container">
+        <p class="eyebrow center">Programs &amp; Transparent Pricing</p>
+        <h1 class="center">Every rupee on the table.<br><em>No hidden tiers, no asterisks.</em></h1>
+        <p class="page-hero-sub center">Two tracks. Three durations. Every consult and every month of medication itemised — before you pay.</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="track-tabs" role="tablist" aria-label="Program tracks">
+          <button class="track-tab active" data-track="sleep" role="tab" aria-selected="true">Sleep &amp; Mind Track</button>
+          <button class="track-tab" data-track="sexual" role="tab" aria-selected="false">Sexual Vitality Track</button>
+        </div>
+
+        <div class="pricing-grid" id="pricing-grid">
+          <!-- Sleep & Mind cards -->
+          <article class="price-card" data-track="sleep" data-plan="sleep-30" data-price="7500">
+            <span class="price-duration">30-Day Sprint</span>
+            <h3>Sleep &amp; Mind · Sprint</h3>
+            <p class="price-amount">₹7,500</p>
+            <ul class="price-list">
+              <li>5 specialist consults</li>
+              <li>1 month medication &amp; protocol</li>
+              <li>Sleep &amp; stress coaching</li>
+              <li>Shared squad case file</li>
+            </ul>
+            <button class="btn btn-outline btn-block" data-select-plan data-track="sleep" data-plan="sleep-30" data-name="OJAS 30-Day Sleep & Mind Program" data-price="7500">Select Program</button>
+          </article>
+          <article class="price-card featured" data-track="sleep" data-plan="sleep-60" data-price="13450">
+            <span class="price-duration">60-Day Recovery</span>
+            <span class="price-pop">Most Popular</span>
+            <h3>Sleep &amp; Mind · Recovery</h3>
+            <p class="price-amount">₹13,450</p>
+            <ul class="price-list">
+              <li>10 specialist consults</li>
+              <li>2 months medication &amp; protocol</li>
+              <li>Sleep architecture lab review</li>
+              <li>Weekly squad note updates</li>
+            </ul>
+            <button class="btn btn-gold btn-block" data-select-plan data-track="sleep" data-plan="sleep-60" data-name="OJAS 60-Day Complete Vitality Program" data-price="13450">Select Program</button>
+          </article>
+          <article class="price-card" data-track="sleep" data-plan="sleep-90" data-price="16950">
+            <span class="price-duration">90-Day Transformation</span>
+            <h3>Sleep &amp; Mind · Transformation</h3>
+            <p class="price-amount">₹16,950</p>
+            <ul class="price-list">
+              <li>15 specialist consults</li>
+              <li>3 months medication &amp; protocol</li>
+              <li>Deep sleep + cortisol tracking</li>
+              <li>Relapse-prevention review</li>
+            </ul>
+            <button class="btn btn-outline btn-block" data-select-plan data-track="sleep" data-plan="sleep-90" data-name="OJAS 90-Day Total Vitality Transformation" data-price="16950">Select Program</button>
+          </article>
+
+          <!-- Sexual Vitality cards -->
+          <article class="price-card" data-track="sexual" data-plan="sexual-30" data-price="9450" hidden>
+            <span class="price-duration">30-Day Sprint</span>
+            <h3>Sexual Vitality · Sprint</h3>
+            <p class="price-amount">₹9,450</p>
+            <ul class="price-list">
+              <li>5 MD andrologist consults</li>
+              <li>Vitality Box (month 1)</li>
+              <li>Performance-anxiety coaching</li>
+              <li>Discreet, unbranded delivery</li>
+            </ul>
+            <button class="btn btn-outline btn-block" data-select-plan data-track="sexual" data-plan="sexual-30" data-name="OJAS 30-Day Sexual Vitality Program" data-price="9450">Select Program</button>
+          </article>
+          <article class="price-card featured" data-track="sexual" data-plan="sexual-60" data-price="18450" hidden>
+            <span class="price-duration">60-Day Recovery</span>
+            <span class="price-pop">Most Popular</span>
+            <h3>Sexual Vitality · Recovery</h3>
+            <p class="price-amount">₹18,450</p>
+            <ul class="price-list">
+              <li>10 MD andrologist consults</li>
+              <li>Vitality Box (2 months)</li>
+              <li>Hormone panel interpretation</li>
+              <li>Weekly squad note updates</li>
+            </ul>
+            <button class="btn btn-gold btn-block" data-select-plan data-track="sexual" data-plan="sexual-60" data-name="OJAS 60-Day Complete Vitality Program" data-price="18450">Select Program</button>
+          </article>
+          <article class="price-card" data-track="sexual" data-plan="sexual-90" data-price="25950" hidden>
+            <span class="price-duration">90-Day Transformation</span>
+            <h3>Sexual Vitality · Transformation</h3>
+            <p class="price-amount">₹25,950</p>
+            <ul class="price-list">
+              <li>15 MD andrologist consults</li>
+              <li>Full vitality kit (3 months)</li>
+              <li>Testosterone + biomarker tracking</li>
+              <li>Relapse-prevention review</li>
+            </ul>
+            <button class="btn btn-outline btn-block" data-select-plan data-track="sexual" data-plan="sexual-90" data-name="OJAS 90-Day Sexual Vitality Transformation" data-price="25950">Select Program</button>
+          </article>
+        </div>
+
+        <p class="pricing-note">All programs include the 4-quadrant diagnostic, shared squad case file, and 100% unbranded delivery. GST included. Cancellation within 48 hours of first consult is fully refundable.</p>
+      </div>
+    </section>
+
+  </section>
+
+  <!-- ══════════ PAGE 5 — DISCREET CHECKOUT ══════════ -->
+  <section class="page page-checkout" data-page="checkout">
+
+    <header class="page-hero page-hero-narrow">
+      <div class="container">
+        <p class="eyebrow center">Secure Checkout</p>
+        <h1 class="center">Private checkout.<br><em>Nothing about this is visible.</em></h1>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container checkout-layout">
+        <div class="checkout-main">
+          <div class="checkout-card">
+            <h2>1 · Program summary</h2>
+            <div class="order-summary" id="order-summary">
+              <div class="order-row">
+                <div>
+                  <span class="order-neutral-tag">Neutral title</span>
+                  <p class="order-title" id="order-title">OJAS 60-Day Complete Vitality Program</p>
+                  <p class="order-detail" id="order-detail">10 specialist consults · 2 months protocol</p>
+                </div>
+                <p class="order-price" id="order-price">₹13,450</p>
+              </div>
+              <div class="order-row">
+                <span>Change program</span>
+                <a href="#/programs" class="btn-link" data-nav>Browse programs</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="checkout-card">
+            <h2>2 · Discretion guarantees</h2>
+            <div class="discretion-grid">
+              <div class="discretion-item">
+                <span class="disc-icon">🏦</span>
+                <h3>Bank statement descriptor</h3>
+                <p>Your statement will read <strong>"ODW Digital Network"</strong> — no medical or brand references, ever.</p>
+              </div>
+              <div class="discretion-item">
+                <span class="disc-icon">📦</span>
+                <h3>Unbranded plain box</h3>
+                <p>Delivery arrives in a plain brown box with no exterior medical or brand logos. Return address is neutral.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="checkout-card">
+            <h2>3 · Payment</h2>
+            <div class="field-row">
+              <label class="field">
+                <span>Your name</span>
+                <input type="text" id="pay-name" placeholder="e.g. Rahul Sharma" autocomplete="name">
+              </label>
+              <label class="field">
+                <span>WhatsApp number</span>
+                <input type="tel" id="pay-phone" placeholder="10-digit mobile" inputmode="numeric" maxlength="10" autocomplete="tel">
+              </label>
+            </div>
+            <div class="pay-methods" role="tablist">
+              <button class="pay-tab active" data-method="upi">UPI</button>
+              <button class="pay-tab" data-method="card">Cards</button>
+              <button class="pay-tab" data-method="netbanking">NetBanking</button>
+            </div>
+            <div class="pay-panel" data-panel="upi">
+              <label class="field">
+                <span>UPI ID</span>
+                <input type="text" placeholder="yourname@okhdfcbank" id="upi-id">
+              </label>
+              <button class="btn btn-gold btn-block" data-pay><span class="pay-label">Pay ₹<span data-pay-amount>13,450</span> Securely</span></button>
+            </div>
+            <div class="pay-panel" data-panel="card" hidden>
+              <label class="field">
+                <span>Card number</span>
+                <input type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" id="card-number">
+              </label>
+              <div class="field-row">
+                <label class="field">
+                  <span>Expiry</span>
+                  <input type="text" placeholder="MM/YY" id="card-expiry">
+                </label>
+                <label class="field">
+                  <span>CVV</span>
+                  <input type="password" placeholder="•••" maxlength="4" id="card-cvv">
+                </label>
+              </div>
+              <button class="btn btn-gold btn-block" data-pay><span class="pay-label">Pay ₹<span data-pay-amount>13,450</span> Securely</span></button>
+            </div>
+            <div class="pay-panel" data-panel="netbanking" hidden>
+              <label class="field">
+                <span>Select your bank</span>
+                <select id="bank-select">
+                  <option>HDFC Bank</option>
+                  <option>ICICI Bank</option>
+                  <option>State Bank of India</option>
+                  <option>Axis Bank</option>
+                  <option>Other bank</option>
+                </select>
+              </label>
+              <button class="btn btn-gold btn-block" data-pay><span class="pay-label">Pay ₹<span data-pay-amount>13,450</span> Securely</span></button>
+            </div>
+            <p class="pay-note">🔒 Payment is collected and <strong>verified</strong> by the payment gateway — UPI, Cards &amp; NetBanking. PCI-DSS compliant.</p>
+          </div>
+
+          <label class="check-row">
+            <input type="checkbox" id="checkout-consent">
+            <span>I consent to my health data being processed for this program under the DPDP Act, 2023, and to receive discreet delivery.</span>
+          </label>
+        </div>
+
+        <aside class="checkout-aside">
+          <div class="secure-box">
+            <span class="secure-lock">🔒</span>
+            <h3>256-bit encrypted checkout</h3>
+            <p>No record of this purchase is linked to your identity on any public ledger or courier system.</p>
+          </div>
+          <div class="secure-box">
+            <h3>What happens next</h3>
+            <ol class="secure-steps">
+              <li>Payment confirmed — receipt shows "ODW Digital Network"</li>
+              <li>Squad assigned within 24 hours</li>
+              <li>Diagnostic review call scheduled discreetly</li>
+              <li>Protocol &amp; Vitality Box ship in plain packaging</li>
+            </ol>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Payment success modal -->
+    <div class="modal-overlay" id="pay-success" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-card modal-success">
+        <div class="success-ring">✓</div>
+        <h2>Payment confirmed</h2>
+        <p>Your receipt is issued under <strong>ODW Digital Network</strong>. Your multi-specialist squad will reach out within 24 hours.</p>
+        <button class="btn btn-gold btn-block" data-close-success>Done</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════ PAGE 6 — MEDICAL PANEL ══════════ -->
+  <section class="page page-panel" data-page="panel">
+
+    <header class="page-hero page-hero-narrow">
+      <div class="container">
+        <p class="eyebrow center">Our Medical Panel</p>
+        <h1 class="center">Registered specialists.<br><em>Verified credentials.</em></h1>
+        <p class="page-hero-sub center">Every doctor on your squad is registered with their State Medical Council. Registration numbers are published below — as mandated by the Telemedicine Practice Guidelines.</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="panel-grid" id="panel-grid">
+          <article class="doc-card">
+            <div class="doc-avatar">DR</div>
+            <h3>Dr. Arjun Mehta</h3>
+            <p class="doc-deg">MD · Andrology &amp; Sexual Medicine</p>
+            <p class="doc-bio">15 years — testosterone optimisation, erectile dysfunction, performance medicine.</p>
+            <p class="doc-reg">Maharashtra Medical Council<br>Reg. No. MMC-2011-04817</p>
+          </article>
+          <article class="doc-card">
+            <div class="doc-avatar">SR</div>
+            <h3>Dr. Sameer Rao</h3>
+            <p class="doc-deg">MS · Urology</p>
+            <p class="doc-bio">12 years — male urology, hormonal panels, post-operative vitality recovery.</p>
+            <p class="doc-reg">Karnataka Medical Council<br>Reg. No. KMC-2013-08742</p>
+          </article>
+          <article class="doc-card">
+            <div class="doc-avatar">VI</div>
+            <h3>Dr. Vaidya Ishaan Verma</h3>
+            <p class="doc-deg">BAMS · AYUSH (Gut &amp; Rasayana)</p>
+            <p class="doc-bio">14 years — gut dysbiosis, Agni restoration, Rasayana-based regenerative protocols.</p>
+            <p class="doc-reg">Uttar Pradesh Ayurvedic Council<br>Reg. No. UPAY-2010-11356</p>
+          </article>
+          <article class="doc-card">
+            <div class="doc-avatar">NP</div>
+            <h3>Dr. Nikhil Patel</h3>
+            <p class="doc-deg">BAMS · AYUSH (Metabolism)</p>
+            <p class="doc-bio">10 years — metabolic health, digestion-driven energy, lifestyle therapeutics.</p>
+            <p class="doc-reg">Gujarat Ayurvedic Council<br>Reg. No. GAC-2014-09231</p>
+          </article>
+          <article class="doc-card">
+            <div class="doc-avatar">AK</div>
+            <h3>Dr. Ananya Krishnan</h3>
+            <p class="doc-deg">M.Phil, PhD · Clinical Psychology</p>
+            <p class="doc-bio">11 years — stress, performance anxiety, sleep behaviour therapy, CBT-I.</p>
+            <p class="doc-reg">Tamil Nadu Psychology Council<br>Reg. No. TNP-2015-03108</p>
+          </article>
+          <article class="doc-card">
+            <div class="doc-avatar">RS</div>
+            <h3>Dr. Rohan Sharma</h3>
+            <p class="doc-deg">MA, PsyD · Clinical Psychology</p>
+            <p class="doc-bio">9 years — burnout, irritability, habit restructuring for recovery protocols.</p>
+            <p class="doc-reg">Delhi Psychology Council<br>Reg. No. DPC-2017-06425</p>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Verification note:</strong>
+          <p>Registration numbers are published in accordance with the Telemedicine Practice Guidelines, 2020. You can independently verify every credential with the respective State Medical Council before your first consult.</p>
+        </div>
+      </div>
+    </section>
+
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <a href="#/" class="brand" data-nav>
+        <span class="brand-mark">ॐ</span>
+        <span class="brand-text">OJAS<span class="brand-sub">Men's Health</span></span>
+      </a>
+      <p class="footer-tag">Vitality. Balance. Strength.</p>
+    </div>
+    <div>
+      <h4>Platform</h4>
+      <a href="#/" data-nav>Home</a>
+      <a href="#/science" data-nav>About &amp; Science</a>
+      <a href="#/diagnostic" data-nav>Diagnostic Tool</a>
+      <a href="#/programs" data-nav>Programs &amp; Pricing</a>
+      <a href="#/panel" data-nav>Medical Panel</a>
+    </div>
+    <div>
+      <h4>Guarantees</h4>
+      <span>HIPAA Compliant</span>
+      <span>DPDP Act, 2023 Shield</span>
+      <span>ABDM Ready</span>
+      <span>100% Unbranded Delivery</span>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <span>care@ojas.health</span>
+      <span>Mon–Sat · 9am–9pm IST</span>
+    </div>
+  </div>
+  <div class="container footer-base">
+    <p>© 2026 OJAS Men's Health Platform. Confidential architecture — draft build for client review.</p>
+    <p class="disclaimer">This platform provides clinical guidance under registered medical supervision and is not a substitute for emergency care.</p>
+  </div>
+</footer>
+
+<!-- ══════════ CONSULT BOOKING (₹99) ══════════ -->
+<div class="modal-overlay" id="consult-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="consult-title">
+  <div class="modal-card consult-card">
+
+    <button class="modal-close" id="consult-close" aria-label="Close">×</button>
+
+    <!-- STEP 1 · Details -->
+    <div class="consult-step" data-consult-step="details">
+      <span class="quiz-badge consult-pillar-tag" id="consult-pillar-tag">Gut Health Consult</span>
+      <h2 id="consult-title">Book your consultation</h2>
+      <p class="consult-sub">A specialist calls you tomorrow. Total fee <strong class="gold">₹99</strong> — paid before the call.</p>
+
+      <label class="field">
+        <span>Full name</span>
+        <input type="text" id="c-name" placeholder="e.g. Rahul Sharma" autocomplete="name">
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Age</span>
+          <input type="number" id="c-age" min="18" max="90" placeholder="e.g. 34" inputmode="numeric">
+        </label>
+        <label class="field">
+          <span>Phone (WhatsApp)</span>
+          <input type="tel" id="c-phone" placeholder="10-digit mobile" inputmode="numeric" maxlength="10" autocomplete="tel">
+        </label>
+      </div>
+      <label class="field">
+        <span>Profession</span>
+        <input type="text" id="c-profession" placeholder="e.g. Software Engineer" autocomplete="organization-title">
+      </label>
+      <label class="field">
+        <span>City</span>
+        <input type="text" id="c-city" placeholder="e.g. Mumbai" autocomplete="address-level2">
+      </label>
+
+      <div class="consult-q">
+        <span class="consult-q-label">Your concern</span>
+        <div class="seg-group seg-problem" id="c-problem">
+          <button type="button" class="seg" data-v="Erectile Dysfunction (ED)">ED</button>
+          <button type="button" class="seg" data-v="Premature Ejaculation (PE)">PME</button>
+          <button type="button" class="seg" data-v="Other concern">Other</button>
+        </div>
+      </div>
+
+      <p class="consult-err" id="consult-err" hidden>Please fill all fields and pick your concern.</p>
+      <button class="btn btn-gold btn-block" id="consult-to-pay">Continue to secure payment →</button>
+    </div>
+
+    <!-- STEP 2 · Pay ₹99 -->
+    <div class="consult-step" data-consult-step="payment" hidden>
+      <span class="quiz-badge consult-pillar-tag" id="consult-pay-tag">Gut Health Consult</span>
+      <h2>One-time consult fee</h2>
+      <div class="consult-summary">
+        <p id="consult-summary-line">Name · Phone · City · Concern</p>
+      </div>
+      <div class="consult-amount">
+        <span class="consult-amt-label">Total</span>
+        <span class="consult-amt" id="consult-amount">₹99</span>
+      </div>
+      <div class="pay-methods" role="tablist" aria-label="Payment methods">
+        <button class="pay-tab active" data-method="upi">UPI</button>
+        <button class="pay-tab" data-method="card">Cards</button>
+        <button class="pay-tab" data-method="netbanking">NetBanking</button>
+      </div>
+      <p class="consult-err" id="pay-err" hidden></p>
+      <button class="btn btn-gold btn-block" id="consult-pay-btn" data-consult-pay>
+        <span>Pay ₹99 &amp; confirm</span>
+      </button>
+      <p class="pay-note">🔒 Payment is collected and <strong>verified</strong> by the payment gateway — the booking can only proceed after the payment clears. Your care team is notified automatically.</p>
+    </div>
+
+    <!-- STEP 3 · Pick time (tomorrow) -->
+    <div class="consult-step" data-consult-step="timeslot" hidden>
+      <div class="consult-check">✓</div>
+      <h2>Payment received — consultation confirmed</h2>
+      <p class="consult-sub">Your doctor's call is booked for <strong class="gold" id="consult-date">Tomorrow</strong>. Pick a time below.</p>
+      <div class="slot-grid" id="consult-slots"></div>
+      <p class="consult-err" id="slot-err" hidden>Please choose a time slot.</p>
+      <button class="btn btn-gold btn-block" id="consult-confirm-slot" disabled>Confirm my time</button>
+    </div>
+
+    <!-- STEP 4 · Done + SMS sent -->
+    <div class="consult-step" data-consult-step="done" hidden>
+      <div class="success-ring">✓</div>
+      <h2>You're all set</h2>
+      <p class="consult-sub">Confirmation sent to your phone and your care team. Show-up reminders have also been booked.</p>
+      <p class="consult-err" id="consult-wa-note" hidden></p>
+      <div class="sms-preview" id="sms-preview"></div>
+      <button class="btn btn-gold btn-block" id="consult-done">Done</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ SCAN-AND-PAY (fallback when no payment gateway is configured) ══════════ -->
+<div class="modal-overlay" id="qr-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+  <div class="modal-card qr-card">
+    <button class="modal-close" id="qr-close" aria-label="Close">×</button>
+    <span class="quiz-badge consult-pillar-tag">Scan &amp; Pay · UPI</span>
+    <h2 id="qr-title">Scan to pay</h2>
+    <p class="consult-sub">Use any UPI app (GPay / PhonePe / Paytm) and scan this code. The amount goes straight to <strong class="gold" id="qr-upi"></strong>.</p>
+    <div class="qr-box"><img id="qr-img" alt="UPI QR code" width="240" height="240"></div>
+    <div class="qr-amount-line"><span class="consult-amt-label">Amount</span><span class="consult-amt" id="qr-amount">₹99</span></div>
+    <p class="qr-label" id="qr-label">OJAS Consult</p>
+    <button class="btn btn-outline btn-block" id="qr-copy">Copy UPI ID</button>
+    <button class="btn btn-gold btn-block" id="qr-confirm">I've paid — continue</button>
+    <p class="pay-note">No gateway is configured on the server yet — this is the fallback payment path.</p>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

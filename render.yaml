@@ -1,0 +1,25 @@
+# Render blueprint — auto-provisions the OJAS web service when this
+# repo is connected to Render (render.com → New Web Service → GitHub).
+# Values marked `sync: false` are prompted once at setup and stored
+# in Render's dashboard — never in git.
+services:
+  - type: web
+    name: ojas
+    runtime: node
+    rootDir: .
+    plan: free
+    startCommand: node server/server.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: CLINIC_WHATSAPP
+        value: 917042347171
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: WA_PHONE_NUMBER_ID
+        sync: false
+      - key: WA_ACCESS_TOKEN
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true

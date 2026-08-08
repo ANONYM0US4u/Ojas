@@ -1,0 +1,14 @@
+{
+  "name": "ojas",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "OJAS — Men's Health Platform: static frontend + zero-dependency payments/WhatsApp backend",
+  "scripts": {
+    "start": "node server/server.mjs",
+    "test": "node e2e-test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,8 @@
+.env
+server/data/
+*.log
+shots/
+.chrome-test/
+.chrome-shot/
+server/server.log
+server/server.err
