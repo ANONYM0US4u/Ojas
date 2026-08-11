@@ -572,6 +572,60 @@
   const CONSULT_FEE = 99;
   const pillarNames = { gut: "Gut Health", mind: "Emotional Health", sleep: "Sleep Health", sexual: "Sexual Health" };
 
+  /* per-pillar consult questions (from ojas_consultation_form_spec) */
+  const CONSULT_SPECS = {
+    sexual: {
+      tag: "SEXUAL HEALTH CONSULT",
+      label: "Your concern",
+      options: [
+        "ED — Erectile Dysfunction",
+        "PME — Premature Ejaculation",
+        "Low Libido / Low Sex Drive",
+        "Performance Anxiety",
+        "Other concern"
+      ],
+      placeholder: "e.g. Performance anxiety, low energy, work stress"
+    },
+    gut: {
+      tag: "GUT HEALTH CONSULT",
+      label: "Your digestive concern",
+      options: [
+        "Bloating or frequent gas",
+        "Irregular bowel movements",
+        "Acidity, heartburn, or GERD",
+        "Low energy or fatigue after meals",
+        "Other digestive concern"
+      ],
+      placeholder: "e.g. Food intolerances, IBS symptoms, chronic acidity"
+    },
+    emotional: {
+      tag: "EMOTIONAL WELL-BEING CONSULT",
+      label: "Your emotional well-being concern",
+      options: [
+        "Chronic stress or inability to relax",
+        "Persistent anxiety or racing thoughts",
+        "Burnout or feeling constantly overwhelmed",
+        "Irritability or mood fluctuations",
+        "Other emotional concern"
+      ],
+      placeholder: "e.g. Work pressure, relationship strain, lack of focus"
+    },
+    sleep: {
+      tag: "SLEEP IMPROVEMENT CONSULT",
+      label: "Your sleep concern",
+      options: [
+        "Difficulty falling asleep (Insomnia)",
+        "Frequent night wake-ups (Fragmented sleep)",
+        "Waking up unrefreshed or tired",
+        "Irregular sleep schedule or shift work",
+        "Other sleep concern"
+      ],
+      placeholder: "e.g. Snoring, late-night screen time, restless sleep"
+    }
+  };
+  /* card data-consult values: mind → emotional spec */
+  const PILLAR_TO_SPEC = { gut: "gut", mind: "emotional", sleep: "sleep", sexual: "sexual" };
+
   const consultModal = $("#consult-modal");
   const consultSteps = $$(".consult-step", consultModal);
 
@@ -595,9 +649,26 @@
 
   function openConsult(pillar) {
     consultCtx = { pillar: pillar || "gut" };
-    const label = pillarNames[consultCtx.pillar];
-    $("#consult-pillar-tag").textContent = label + " Consult";
-    $("#consult-pay-tag").textContent = label + " Consult";
+    const spec = CONSULT_SPECS[PILLAR_TO_SPEC[consultCtx.pillar]] || CONSULT_SPECS.sexual;
+    const label = spec.tag;
+    $("#consult-pillar-tag").textContent = label;
+    $("#consult-pay-tag").textContent = label;
+    $("#c-problem-label").textContent = spec.label;
+    $("#c-problem").innerHTML = "";
+    spec.options.forEach((opt) => {
+      const l = document.createElement("label");
+      l.className = "check-row";
+      const c = document.createElement("input");
+      c.type = "checkbox";
+      c.className = "cbox";
+      c.value = opt.indexOf("Other") === 0 ? "Other" : opt;
+      const s = document.createElement("span");
+      s.textContent = opt;
+      l.appendChild(c);
+      l.appendChild(s);
+      $("#c-problem").appendChild(l);
+    });
+    $("#c-other").placeholder = spec.placeholder;
     $("#c-name").value = ""; $("#c-age").value = ""; $("#c-phone").value = "";
     $("#c-profession").value = ""; $("#c-city").value = "";
     $$("#c-problem .cbox").forEach((b) => { b.checked = false; });
@@ -616,12 +687,15 @@
   }
 
   /* problem checkboxes (+ "Other" free-text) & duration
-     single-select */
-  $$("#c-problem .cbox").forEach((b) => b.addEventListener("change", () => {
-    const other = b.value === "Other";
-    $("#c-other-field").hidden = !(other && b.checked);
-    if (other && b.checked) $("#c-other").focus();
-  }));
+     single-select — delegated, because the options are rendered
+     per-pillar inside openConsult */
+  consultModal.addEventListener("change", (e) => {
+    const box = e.target.closest("#c-problem .cbox");
+    if (!box) return;
+    const other = box.value === "Other";
+    $("#c-other-field").hidden = !(other && box.checked);
+    if (other && box.checked) $("#c-other").focus();
+  });
   $$("#c-duration .seg").forEach((b) => b.addEventListener("click", () => {
     $$("#c-duration .seg").forEach((x) => x.classList.remove("active"));
     b.classList.add("active");

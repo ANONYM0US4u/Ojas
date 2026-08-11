@@ -85,6 +85,41 @@
       </div>
     </div>
 
+    <section class="section quadrant-section">
+      <div class="container">
+        <p class="eyebrow center">The 4-Quadrant Ecosystem</p>
+        <h2 class="section-title center">Four pillars. <em>One chain.</em></h2>
+        <p class="section-sub center">Your gut, mind, sleep and sexual health are not separate problems. They are one system — and they fall together. Hover a pillar to trace its connection to the others.</p>
+        <div class="quad-grid" id="quad-grid">
+          <button class="quad-card" data-pillar="sexual" data-consult="sexual" data-connections="gut,mind,sleep" aria-label="Book a sexual health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Sexual</h3>
+            <p>Performance pressure compounds physiology — anxiety spikes cortisol further.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+          <button class="quad-card" data-pillar="sleep" data-consult="sleep" data-connections="gut,mind,sexual" aria-label="Book a sleep health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Sleep</h3>
+            <p>Fragmented sleep shuts the window where most of your testosterone is built.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+          <button class="quad-card" data-pillar="gut" data-consult="gut" data-connections="sleep,sexual" aria-label="Book a gut health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Gut</h3>
+            <p>Dysbiosis drops serotonin — the master signal for mood <em>and</em> nocturnal repair.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+          <button class="quad-card" data-pillar="mind" data-consult="mind" data-connections="gut,sleep,sexual" aria-label="Book a mental health consultation">
+            <span class="quad-glyph">◉</span>
+            <h3>Emotional</h3>
+            <p>Chronic stress raises cortisol, telling your body to postpone every recovery process.</p>
+            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
+          </button>
+        </div>
+        <p class="quad-caption" id="quad-caption">Gut dysbiosis → serotonin drop → mood, sleep architecture, and nocturnal testosterone are all downstream of one root.</p>
+      </div>
+    </section>
+
     <section class="section trust-section">
       <div class="container">
         <h2 class="section-label">The OJAS Trust Shield</h2>
@@ -110,41 +145,6 @@
             <p>Plain brown boxes. No logos, no labels, no questions. Ever.</p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section quadrant-section">
-      <div class="container">
-        <p class="eyebrow center">The 4-Quadrant Ecosystem</p>
-        <h2 class="section-title center">Four pillars. <em>One chain.</em></h2>
-        <p class="section-sub center">Your gut, mind, sleep and sexual health are not separate problems. They are one system — and they fall together. Hover a pillar to trace its connection to the others.</p>
-        <div class="quad-grid" id="quad-grid">
-          <button class="quad-card" data-pillar="gut" data-consult="gut" data-connections="sleep,sexual" aria-label="Book a gut health consultation">
-            <span class="quad-glyph">◉</span>
-            <h3>Gut</h3>
-            <p>Dysbiosis drops serotonin — the master signal for mood <em>and</em> nocturnal repair.</p>
-            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
-          </button>
-          <button class="quad-card" data-pillar="mind" data-consult="mind" data-connections="gut,sleep,sexual" aria-label="Book a mental health consultation">
-            <span class="quad-glyph">◉</span>
-            <h3>Emotional</h3>
-            <p>Chronic stress raises cortisol, telling your body to postpone every recovery process.</p>
-            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
-          </button>
-          <button class="quad-card" data-pillar="sleep" data-consult="sleep" data-connections="gut,mind,sexual" aria-label="Book a sleep health consultation">
-            <span class="quad-glyph">◉</span>
-            <h3>Sleep</h3>
-            <p>Fragmented sleep shuts the window where most of your testosterone is built.</p>
-            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
-          </button>
-          <button class="quad-card" data-pillar="sexual" data-consult="sexual" data-connections="gut,mind,sleep" aria-label="Book a sexual health consultation">
-            <span class="quad-glyph">◉</span>
-            <h3>Sexual</h3>
-            <p>Performance pressure compounds physiology — anxiety spikes cortisol further.</p>
-            <span class="quad-hint">Hover to trace · Tap to consult ↓</span>
-          </button>
-        </div>
-        <p class="quad-caption" id="quad-caption">Gut dysbiosis → serotonin drop → mood, sleep architecture, and nocturnal testosterone are all downstream of one root.</p>
       </div>
     </section>
 
@@ -946,15 +946,10 @@
       </label>
 
       <div class="consult-q">
-        <span class="consult-q-label">Your concern</span>
-        <div class="consult-choices" id="c-problem">
-          <label class="check-row"><input type="checkbox" class="cbox" value="Erectile Dysfunction (ED)"><span>ED — Erectile Dysfunction</span></label>
-          <label class="check-row"><input type="checkbox" class="cbox" value="Premature Ejaculation (PE)"><span>PME — Premature Ejaculation</span></label>
-          <label class="check-row"><input type="checkbox" class="cbox" value="Other"><span>Other concern</span></label>
-        </div>
+        <span class="consult-q-label" id="c-problem-label">Your concern</span>
+        <div class="consult-choices" id="c-problem"></div>
         <label class="field other-field" id="c-other-field" hidden>
-          <span>Describe your concern</span>
-          <input type="text" id="c-other" placeholder="e.g. Low libido, anxiety, work stress…" autocomplete="off">
+          <input type="text" id="c-other" placeholder="" autocomplete="off">
         </label>
       </div>
 
@@ -981,11 +976,6 @@
       <div class="consult-amount">
         <span class="consult-amt-label">Total</span>
         <span class="consult-amt" id="consult-amount">₹99</span>
-      </div>
-      <div class="pay-methods" role="tablist" aria-label="Payment methods">
-        <button class="pay-tab active" data-method="upi">UPI</button>
-        <button class="pay-tab" data-method="card">Cards</button>
-        <button class="pay-tab" data-method="netbanking">NetBanking</button>
       </div>
       <p class="consult-err" id="pay-err" hidden></p>
       <button class="btn btn-gold btn-block" id="consult-pay-btn" data-consult-pay>
