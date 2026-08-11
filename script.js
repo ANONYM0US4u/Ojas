@@ -365,6 +365,7 @@
      · demo      — test mode (window.__OJAS_TEST__): instant fake pay. */
   let payMode = "demo";
   let payoutSuccess = [];
+  let confirmedBookingId = "";
   const API_BASE = location.protocol === "file:" ? "http://localhost:8787" : "";
 
   function currentPlan() {
@@ -743,6 +744,7 @@
                 }
               });
               payoutSuccess = v.wa || [];
+              confirmedBookingId = v.bookingId || "";
               afterPayment();
             } catch (err) {
               console.error(err);
@@ -869,13 +871,26 @@
   }
 
   /* confirm → save + preview + finish (payment already verified) */
-  $("#consult-confirm-slot").addEventListener("click", () => {
+  $("#consult-confirm-slot").addEventListener("click", async () => {
     if (!selectedSlot) { $("#slot-err").hidden = false; return; }
     const id = saveConsultation();
     renderSmsPreview();
+    const c = consultCtx;
+    let waResult = [];
+    if (confirmedBookingId) {
+      try {
+        const r = await postJson("/api/booking-time", {
+          bookingRef: confirmedBookingId,
+          date: dateLabel(),
+          slot: selectedSlot,
+          booking: { name: c.name, age: c.age, phone: c.phone, city: c.city, concern: c.concern, duration: c.duration }
+        });
+        waResult = r.wa || [];
+      } catch (err) { waResult = ["clinic-failed: " + err.message]; }
+    }
     const waNote = $("#consult-wa-note");
     if (waNote) {
-      const failed = payoutSuccess.filter((w) => String(w).includes("failed"));
+      const failed = waResult.filter((w) => String(w).includes("failed"));
       waNote.textContent = failed.length
         ? "Care team WhatsApp push pending setup (" + failed.join(", ") + ")."
         : "Your care team has been notified automatically.";

@@ -275,21 +275,34 @@ async function handleApi(req, res, url) {
       } catch (e) { xferReports.push("transfer-failed: " + e.message); }
     }
 
+    return json(res, 200, { ok: true, bookingId: rec.merchantRef, transfers: xferReports });
+  }
+
+  if (url.pathname === "/api/booking-time" && req.method === "POST") {
+    let body;
+    try { body = JSON.parse(await readBody(req)); } catch { return json(res, 400, { error: "bad json" }); }
+
+    const bookingRef = String(body.bookingRef || "");
+    const date = String(body.date || "-");
+    const slot = String(body.slot || "");
+    const b = (typeof body.booking === "object" && body.booking) || {};
+    if (!bookingRef) return json(res, 400, { error: "missing bookingRef" });
+
     const waReports = [];
     const clinicNum = CFG.clinicWhatsapp.replace(/^\+/, "");
     if (clinicNum) {
-      const b = booking;
       try {
         await waSendTemplate(clinicNum, "new_booking_alert", "en", [
           (b.name || "-") + " (" + (b.age || "-") + ", " + (b.city || "-") + ")",
-          String(b.phone || booking.phone || "-"),
+          String(b.phone || "-"),
           (b.concern || "-") + ", " + (b.duration || "-"),
-          (b.date || "-") + (b.slot ? " " + b.slot : "")
+          date + (slot ? " " + slot : "")
         ]);
         waReports.push("clinic");
       } catch (e) { waReports.push("clinic-failed: " + e.message); }
     }
-    return json(res, 200, { ok: true, bookingId: rec.merchantRef, wa: waReports, transfers: xferReports });
+    log("SLOT " + bookingRef + " " + date + " " + slot + " wa=" + waReports.join(","));
+    return json(res, 200, { ok: true, wa: waReports });
   }
 
   if (url.pathname === "/api/orders" && req.method === "GET") {
