@@ -113,6 +113,27 @@ async function waSend(to, text) {
   return data;
 }
 
+async function waSendTemplate(to, templateName, langCode, bodyParams) {
+  if (!waConfigured()) throw new Error("WhatsApp not configured on server");
+  const r = await fetch("https://graph.facebook.com/v21.0/" + CFG.waPhoneNumberId + "/messages", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + CFG.waToken, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to: String(to),
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: langCode },
+        components: [{ type: "body", parameters: bodyParams.map((p) => ({ type: "text", text: String(p) })) }]
+      }
+    })
+  });
+  const data = await r.json().catch(() => null);
+  if (!r.ok) throw new Error("WhatsApp " + r.status + ": " + JSON.stringify(data));
+  return data;
+}
+
 /* ── order book (JSONL audit log) ───────────────────────────────── */
 function storeBooking(rec) { appendFileSync(ORDERS_LOG, JSON.stringify(rec) + "\n"); }
 
@@ -257,13 +278,16 @@ async function handleApi(req, res, url) {
     const waReports = [];
     const clinicNum = CFG.clinicWhatsapp.replace(/^\+/, "");
     if (clinicNum) {
-      try { await waSend(clinicNum, buildClinicMessage(rec)); waReports.push("clinic"); }
-      catch (e) { waReports.push("clinic-failed: " + e.message); }
-    }
-    const patientPhone = String(booking.phone || "").replace(/[^0-9]/g, "");
-    if (patientPhone) {
-      try { await waSend(patientPhone, buildPatientMessage(rec)); waReports.push("patient"); }
-      catch (e) { waReports.push("patient-failed: " + e.message); }
+      const b = booking;
+      try {
+        await waSendTemplate(clinicNum, "new_booking_alert", "en", [
+          (b.name || "-") + " (" + (b.age || "-") + ", " + (b.city || "-") + ")",
+          String(b.phone || booking.phone || "-"),
+          (b.concern || "-") + ", " + (b.duration || "-"),
+          (b.date || "-") + (b.slot ? " " + b.slot : "")
+        ]);
+        waReports.push("clinic");
+      } catch (e) { waReports.push("clinic-failed: " + e.message); }
     }
     return json(res, 200, { ok: true, bookingId: rec.merchantRef, wa: waReports, transfers: xferReports });
   }
