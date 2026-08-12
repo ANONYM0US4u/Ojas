@@ -16,8 +16,6 @@
     "science": "science",
     "diagnostic": "diagnostic",
     "results": "results",
-    "programs": "programs",
-    "checkout": "checkout",
     "panel":   "panel"
   };
 
@@ -25,6 +23,7 @@
   const navLinks = $$("[data-nav]");
 
   function navigate() {
+    stopComputing();
     const hash = location.hash.replace(/^#\/?/, "").split("?")[0];
     const pageName = routes[hash] || "home";
     pages.forEach((p) => p.classList.toggle("active", p.dataset.page === pageName));
@@ -36,8 +35,21 @@
     if (pageName !== "home") document.title = pageName.replace(/\b\w/g, (c) => c.toUpperCase()) + " · OJAS";
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
     closeNav();
-    if (pageName === "results" && !quizState.computed) {
+    if (pageName === "results" && (quizState.computing || !quizState.computed)) {
       location.hash = "#/diagnostic";
+    }
+    /* a finished quiz leaves the computing screen visible forever —
+       reset to intro whenever Diagnostic is opened again */
+    if (pageName === "diagnostic" && quizState.computed) {
+      quizState.selected = [];
+      quizState.flow = [];
+      quizState.step = 0;
+      quizState.answers = {};
+      quizState.computed = false;
+      quizState.computing = false;
+      $$(".cat-card").forEach((c) => c.classList.remove("selected"));
+      syncPickerBtn();
+      showScreen("intro");
     }
   }
 
@@ -77,189 +89,372 @@
   });
 
   /* ── Quiz Engine ──────────────────────────── */
-  const quizState = { step: 0, answers: {}, computed: false };
-  const stepOrder = ["gut", "mind", "sleep", "sexual"];
+  const ASSESSMENT_SPECS = {
+    sexual: {
+      label: "Sexual Health",
+      tag: "SEXUAL HEALTH ASSESSMENT",
+      symptoms: [
+        "ED — Erectile Dysfunction",
+        "PME — Premature Ejaculation",
+        "Low Libido",
+        "Performance Anxiety"
+      ],
+      notePlaceholder: "Other symptoms or specific notes… e.g. frequency, triggers, anything the doctor should know"
+    },
+    sleep: {
+      label: "Sleep Improvement",
+      tag: "SLEEP IMPROVEMENT ASSESSMENT",
+      symptoms: [
+        "Trouble falling asleep",
+        "Waking up frequently",
+        "Waking up exhausted",
+        "Irregular sleep schedule"
+      ],
+      notePlaceholder: "Other symptoms or specific notes… e.g. shift work, snoring, restless nights"
+    },
+    gut: {
+      label: "Gut Health",
+      tag: "GUT HEALTH ASSESSMENT",
+      symptoms: [
+        "Bloating or frequent gas",
+        "Irregular bowel movements",
+        "Acidity, heartburn, or GERD",
+        "Low energy after meals"
+      ],
+      notePlaceholder: "Other symptoms or specific notes… e.g. food triggers, IBS, chronic acidity"
+    },
+    mind: {
+      label: "Emotional Well-Being",
+      tag: "EMOTIONAL WELL-BEING ASSESSMENT",
+      symptoms: [
+        "Chronic stress",
+        "Persistent anxiety/worry",
+        "Burnout",
+        "Mood swings"
+      ],
+      notePlaceholder: "Other symptoms or specific notes… e.g. work pressure, relationship strain, racing thoughts"
+    }
+  };
+  const CAT_ORDER = ["sexual", "sleep", "gut", "mind"];
+
+  const quizState = { selected: [], flow: [], step: 0, answers: {}, computed: false, computing: false };
   const screens = $$(".quiz-screen");
   const progress = $("#quiz-progress");
   const progressFill = $("#quiz-progress-fill");
-  const stepDots = $$(".qstep");
+
+  function currentScreenName() {
+    const el = screens.find((s) => !s.hidden);
+    return el ? el.dataset.screen : "";
+  }
 
   function showScreen(name) {
     screens.forEach((s) => (s.hidden = s.dataset.screen !== name));
-    if (name === "intro" || name === "computing") progress.hidden = true;
-    else progress.hidden = false;
+    progress.hidden = name === "intro" || name === "computing" || name === "picker";
   }
 
   function renderProgress() {
-    const pct = ((quizState.step) / stepOrder.length) * 100;
-    progressFill.style.width = pct + "%";
-    stepDots.forEach((d, i) => {
-      const s = d.classList.contains("qs-gut") ? "gut" : d.classList.contains("qs-mind") ? "mind" : d.classList.contains("qs-sleep") ? "sleep" : "sexual";
-      d.classList.toggle("on", stepOrder.indexOf(s) <= quizState.step);
-    });
+    const total = quizState.flow.length;
+    if (!total) return;
+    progressFill.style.width = ((quizState.step / total) * 100) + "%";
+    const label = $("#quiz-step-count");
+    if (label) {
+      label.textContent = "Step " + (quizState.step + 1) + " of " + total + " · " + ASSESSMENT_SPECS[quizState.flow[quizState.step]].label;
+    }
   }
 
-  function syncStepButtons() {
-    const screen = stepOrder[quizState.step];
-    const screenEl = $('.quiz-screen[data-screen="' + screen + '"]');
-    if (!screenEl) return;
-    const groups = $$(".seg-group", screenEl);
-    let complete = true;
-    groups.forEach((g) => { if (!g.dataset.selection) complete = false; });
-    const nextBtn = $("[data-next-step]", screenEl);
-    if (nextBtn) nextBtn.disabled = !complete;
-  }
+  /* ---- category picker ---- */
+  const catGrid = $("#cat-grid");
+  const pickerBtn = $("[data-picker-continue]");
+  function syncPickerBtn() { pickerBtn.disabled = quizState.selected.length === 0; }
 
-  /* segmented buttons */
-  $$(".seg-group").forEach((group) => {
-    const key = group.dataset.q;
-    group.addEventListener("click", (e) => {
-      const btn = e.target.closest(".seg");
-      if (!btn) return;
-      $$(".seg", group).forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      group.dataset.selection = btn.dataset.v;
-      quizState.answers[key] = Number(btn.dataset.v);
-      syncStepButtons();
-    });
+  catGrid.addEventListener("click", (e) => {
+    const card = e.target.closest(".cat-card");
+    if (!card) return;
+    const cat = card.dataset.cat;
+    card.classList.toggle("selected");
+    const i = quizState.selected.indexOf(cat);
+    if (i >= 0) quizState.selected.splice(i, 1);
+    else quizState.selected.push(cat);
+    syncPickerBtn();
   });
 
-  /* sliders */
-  $$('input[type="range"].slider').forEach((slider) => {
-    const valEl = $('[data-val-for="' + slider.dataset.q + '"]');
-    const update = () => {
-      quizState.answers[slider.dataset.q] = Number(slider.value);
-      if (valEl) valEl.textContent = slider.value;
-    };
-    slider.addEventListener("input", update);
-    update();
+  $("#select-all-cats").addEventListener("click", () => {
+    quizState.selected = CAT_ORDER.slice();
+    $$(".cat-card").forEach((c) => c.classList.add("selected"));
+    syncPickerBtn();
   });
 
   $("[data-start-quiz]").addEventListener("click", () => {
+    quizState.selected = [];
+    quizState.flow = [];
     quizState.step = 0;
+    quizState.answers = {};
     quizState.computed = false;
-    showScreen(stepOrder[0]);
-    renderProgress();
-    syncStepButtons();
+    quizState.computing = false;
+    stopComputing();
+    $$(".cat-card").forEach((c) => c.classList.remove("selected"));
+    syncPickerBtn();
+    showScreen("picker");
   });
 
-  /* Delegate prev/next — every step screen has its own buttons */
+  pickerBtn.addEventListener("click", () => {
+    quizState.flow = CAT_ORDER.filter((c) => quizState.selected.indexOf(c) >= 0);
+    quizState.step = 0;
+    quizState.answers = {};
+    renderCategory();
+    renderProgress();
+    showScreen("category");
+  });
+
+  /* ---- dynamic category checklist ---- */
+  const catSymptoms = $("#cat-symptoms");
+  const catNote = $("#cat-note");
+  const catInvalid = $("#cat-invalid");
+
+  function currentCat() { return quizState.flow[quizState.step]; }
+
+  function catAnswer(cat) {
+    if (!quizState.answers[cat]) quizState.answers[cat] = { symptoms: [], note: "" };
+    return quizState.answers[cat];
+  }
+
+  function catHasContent() {
+    const a = catAnswer(currentCat());
+    const txt = (a.note || "").trim();
+    return a.symptoms.length > 0 || txt.length > 0;
+  }
+
+  function syncCatButton() {
+    const btn = $('[data-screen="category"] [data-next-step]');
+    if (!btn) return;
+    btn.disabled = !catHasContent();
+    btn.textContent = quizState.step === quizState.flow.length - 1 ? "Submit & Generate My Matrix" : "Continue";
+  }
+
+  function renderCategory() {
+    const cat = currentCat();
+    const spec = ASSESSMENT_SPECS[cat];
+    const a = catAnswer(cat);
+    $("#cat-badge").textContent = spec.tag;
+    $("#cat-title").textContent = spec.tag;
+    catInvalid.hidden = true;
+    catSymptoms.innerHTML = "";
+    spec.symptoms.forEach((sym) => {
+      const l = document.createElement("label");
+      l.className = "check-row";
+      const c = document.createElement("input");
+      c.type = "checkbox";
+      c.className = "cbox";
+      c.value = sym;
+      c.checked = a.symptoms.indexOf(sym) >= 0;
+      const s = document.createElement("span");
+      s.textContent = sym;
+      l.appendChild(c);
+      l.appendChild(s);
+      catSymptoms.appendChild(l);
+    });
+    catNote.value = a.note || "";
+    catNote.placeholder = spec.notePlaceholder;
+    syncCatButton();
+  }
+
+  catSymptoms.addEventListener("change", (e) => {
+    const box = e.target.closest("input.cbox");
+    if (!box) return;
+    const a = catAnswer(currentCat());
+    const i = a.symptoms.indexOf(box.value);
+    if (box.checked && i < 0) a.symptoms.push(box.value);
+    if (!box.checked && i >= 0) a.symptoms.splice(i, 1);
+    catInvalid.hidden = true;
+    syncCatButton();
+  });
+
+  catNote.addEventListener("input", () => {
+    catAnswer(currentCat()).note = catNote.value;
+    catInvalid.hidden = true;
+    syncCatButton();
+  });
+
+  /* ---- nav: back / continue ---- */
   document.addEventListener("click", (e) => {
     const prev = e.target.closest("[data-prev-step]");
     const next = e.target.closest("[data-next-step]");
     if (prev) {
-      if (quizState.step === 0) { showScreen("intro"); return; }
+      if (currentScreenName() === "picker") { showScreen("intro"); return; }
+      if (quizState.step === 0) { showScreen("picker"); return; }
       quizState.step--;
-      showScreen(stepOrder[quizState.step]);
+      renderCategory();
       renderProgress();
-      syncStepButtons();
-    } else if (next) {
-      if (quizState.step < stepOrder.length - 1) {
+    } else if (next && currentScreenName() === "category") {
+      if (!catHasContent()) { catInvalid.hidden = false; return; }
+      if (quizState.step === quizState.flow.length - 1) {
+        submitQuiz();
+      } else {
         quizState.step++;
-        showScreen(stepOrder[quizState.step]);
+        renderCategory();
         renderProgress();
       }
     }
   });
 
-  /* ── Compute results ─────────────────────── */
-  function segScore(groupKey) { return quizState.answers[groupKey] != null ? Number(quizState.answers[groupKey]) : 0; }
+  /* ---- compute + submit ---- */
+  let computeTick = null;
+  let computeTimeout = null;
+  function stopComputing() {
+    if (computeTick != null) { clearInterval(computeTick); computeTick = null; }
+    if (computeTimeout != null) { clearTimeout(computeTimeout); computeTimeout = null; }
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   function computePillars() {
-    const gut = ((segScore("gut-acidity") + segScore("gut-bloating") + segScore("gut-digestion")) / 9) * 100;
-    const mind = ((quizState.answers["mind-burnout"] || 5) + (quizState.answers["mind-stress"] || 5) + (quizState.answers["mind-irritability"] || 5) - 3) / 27 * 100;
-    const sleep = ((segScore("sleep-duration") + segScore("sleep-interruptions") + segScore("sleep-fatigue")) / 9) * 100;
-    const sexual = ((segScore("sexual-anxiety") + segScore("sexual-stamina") + segScore("sexual-morning")) / 9) * 100;
-    return { gut: Math.round(gut), mind: Math.round(mind), sleep: Math.round(sleep), sexual: Math.round(sexual) };
+    const p = {};
+    quizState.flow.forEach((cat) => {
+      const a = quizState.answers[cat];
+      if (!a) return;
+      const spec = ASSESSMENT_SPECS[cat];
+      let s = (a.symptoms.length / spec.symptoms.length) * 100;
+      if (a.note && a.note.trim()) s = Math.min(100, s + 8);
+      p[cat] = Math.round(s);
+    });
+    return p;
   }
 
+  function submitQuiz() {
+    if (quizState.computing) return;
+    quizState.computing = true;
+    quizState.computed = true;
+    showScreen("computing");
+    const statusEl = $("#compute-status");
+    const statuses = [
+      "Mapping your selected areas…",
+      "Tracing cortisol & stress load…",
+      "Checking nocturnal testosterone window…",
+      "Assembling your domino chain…"
+    ];
+    let i = 0;
+    computeTick = setInterval(() => {
+      i++;
+      if (i < statuses.length) statusEl.textContent = statuses[i];
+    }, 700);
+    computeTimeout = setTimeout(() => {
+      stopComputing();
+      quizState.computing = false;
+      renderResults();
+      location.hash = "#/results";
+    }, 3000);
+  }
+
+  $("[data-restart-quiz]").addEventListener("click", () => {
+    quizState.computed = false;
+    quizState.computing = false;
+    stopComputing();
+    showScreen("intro");
+    location.hash = "#/diagnostic";
+  });
+
+  /* results CTA — book a ₹99 consult covering every assessed pillar */
+  $("#results-consult").addEventListener("click", () => {
+    openConsult(quizState.flow.length ? quizState.flow : ["sexual"]);
+  });
+
+  /* ── Domino Graph + Clinical Summary ─────── */
   function describe(level) {
     if (level < 34) return { tag: "stable", copy: "in a stable range — this pillar is currently protecting your recovery." };
     if (level < 67) return { tag: "strained", copy: "under strain — it is eroding your recovery faster than you feel day-to-day." };
     return { tag: "critical", copy: "critically overloaded — this is a dominant force in your symptom chain right now." };
   }
 
-  $("[data-submit-quiz]").addEventListener("click", () => {
-    quizState.computed = true;
-    showScreen("computing");
-    const statusEl = $("#compute-status");
-    const statuses = [
-      "Mapping gut → serotonin pool…",
-      "Tracing cortisol & stress load…",
-      "Checking nocturnal testosterone window…",
-      "Assembling your domino chain…"
-    ];
-    let i = 0;
-    const tick = setInterval(() => {
-      i++;
-      if (i < statuses.length) statusEl.textContent = statuses[i];
-    }, 700);
-    setTimeout(() => {
-      clearInterval(tick);
-      renderResults();
-      location.hash = "#/results";
-    }, 3000);
-  });
-
-  $("[data-restart-quiz]").addEventListener("click", () => {
-    quizState.computed = false;
-    $$(".seg-group").forEach((g) => { delete g.dataset.selection; });
-    $$(".seg.active").forEach((b) => b.classList.remove("active"));
-    showScreen("intro");
-    location.hash = "#/diagnostic";
-  });
-
-  /* ── Domino Graph + Clinical Summary ─────── */
   function renderResults() {
     const p = computePillars();
     const order = ["gut", "mind", "sleep", "sexual"];
-    const hot = order.filter((k) => p[k] >= 50);
+    const is = (k) => p[k] != null;
 
-    /* pillar bars */
+    /* pillar bars — unassessed hidden entirely */
     order.forEach((k) => {
-      const fill = $(".pbar-fill.pf-" + k);
+      const bar = $('.pbar[data-pillar="' + k + '"]');
+      if (!bar) return;
+      bar.hidden = !is(k);
+      if (!is(k)) return;
+      const fill = $(".pbar-fill.pf-" + k, bar);
       const val = $("#pval-" + k);
       val.textContent = p[k];
       requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = p[k] + "%"; }));
     });
 
-    /* reset graph */
-    $$(".graph-node").forEach((n) => n.classList.remove("lit", "hot"));
+    /* graph — reset, hide unassessed nodes/edges */
+    const nodePillar = {
+      gut: "gut", serotonin: "gut",
+      stress: "mind", cortisol: "mind",
+      testosterone: "sleep", "sexual-dysfunction": "sexual"
+    };
+    $$(".graph-node").forEach((n) => {
+      n.classList.remove("lit", "hot");
+      n.style.display = is(nodePillar[n.dataset.node]) ? "" : "none";
+    });
     $$(".edge").forEach((e) => e.classList.remove("lit"));
 
-    const gutHot = p.gut >= 50, stressHot = p.mind >= 50, sleepHot = p.sleep >= 50;
+    /* solo-pillar runs — center the lone node in the frame (the fixed
+       map layout would strand it at a corner or bottom edge) */
+    const solo = quizState.flow.length === 1;
+    $("#domino-graph").classList.toggle("map-solo", solo);
+    const soloNote = $("#map-solo-note");
+    if (soloNote) soloNote.hidden = !solo;
+
+    const g = is("gut"), m = is("mind"), sl = is("sleep"), sx = is("sexual");
+    [
+      { sel: ".e-gut-ser", on: g },
+      { sel: ".e-ser-t", on: g && sl },
+      { sel: ".e-stress-cort", on: m },
+      { sel: ".e-cort-t", on: m && sl },
+      { sel: ".e-t-sd", on: sl && sx }
+    ].forEach((ed) => {
+      const el = $(ed.sel);
+      if (el) el.style.display = ed.on ? "" : "none";
+    });
+
+    const hotOnes = order.filter((k) => is(k) && p[k] >= 50);
     const seq = [];
-    if (gutHot) { seq.push(".gn-gut", ".e-gut-ser", ".gn-ser"); }
-    if (stressHot) { seq.push(".gn-stress", ".e-stress-cort", ".gn-cort"); }
-    seq.push(".e-ser-t", ".e-cort-t", ".gn-t", ".e-t-sd", ".gn-sd");
+    if (g) seq.push(".gn-gut", ".e-gut-ser", ".gn-ser");
+    if (m) seq.push(".gn-stress", ".e-stress-cort", ".gn-cort");
+    if (g && sl) seq.push(".e-ser-t");
+    if (m && sl) seq.push(".e-cort-t");
+    if (sl) seq.push(".gn-t");
+    if (sl && sx) seq.push(".e-t-sd");
+    if (sx) seq.push(".gn-sd");
 
     let delay = 0;
     seq.forEach((sel) => {
       setTimeout(() => {
         const el = $(sel);
         if (!el) return;
-        if (el.classList.contains("edge")) el.classList.add("lit");
-        else {
+        if (el.classList.contains("edge")) {
           el.classList.add("lit");
-          if (el.classList.contains("gn-t") && (gutHot || stressHot || sleepHot)) el.classList.add("hot");
-          if (el.classList.contains("gn-sd")) el.classList.add("hot");
+        } else {
+          el.classList.add("lit");
+          if (el.classList.contains("gn-t") && hotOnes.some((k) => k !== "sexual")) el.classList.add("hot");
+          if (el.classList.contains("gn-sd") && sx) el.classList.add("hot");
+          if (hotOnes.indexOf(nodePillar[el.dataset.node]) >= 0) el.classList.add("hot");
         }
       }, delay);
       delay += 420;
     });
 
-    /* clinical summary */
+    /* clinical summary — only assessed pillars */
     const hl = $("#summary-headline");
     const box = $("#summary-text");
-    const topPillars = order.filter((k) => p[k] >= 34).sort((a, b) => p[b] - p[a]);
+    const names = { gut: "Gut", mind: "Emotional", sleep: "Sleep", sexual: "Sexual" };
+    const topPillars = order.filter((k) => is(k) && p[k] >= 34).sort((a, b) => p[b] - p[a]);
     let html = "";
     let headline = "Your root-cause reading";
 
     if (topPillars.length === 0) {
       headline = "Your system is holding";
-      html = "<p>All four pillars are in a stable range. Your body's recovery systems are largely intact — this is the strongest starting point for optimisation.</p><p>Our squad would still map your <span class='sum-link'>mild strain points</span> and design a protocol to keep every domino standing.</p>";
+      const list = quizState.flow.map((c) => names[c]).join(", ");
+      html = "<p>" + list + " — " + (quizState.flow.length === 1 ? "your assessed area is" : "your assessed areas are") +
+        " in a stable range. Your body's recovery systems are largely intact — the strongest starting point for optimisation.</p>" +
+        "<p>Our squad would still map your mild strain points and design a protocol to keep every domino standing.</p>";
     } else {
-      headline = "Your chain starts at " + topPillars[0];
+      headline = "Your chain starts at " + names[topPillars[0]];
       const chainCopy = {
         gut: "Gut dysbiosis is suppressing your serotonin pool — the same signalling network that steers mood <em>and</em> nocturnal hormone production.",
         mind: "Elevated cortisol from unmanaged stress is telling your body to postpone repair work — including the overnight testosterone build.",
@@ -268,12 +463,17 @@
       };
       topPillars.slice(0, 2).forEach((k) => {
         const d = describe(p[k]);
-        html += "<p><strong class='sum-link' style='text-transform:capitalize'>" + k + "</strong>: " + d.copy + " " + chainCopy[k] + "</p>";
+        html += "<p><strong class='sum-link' style='text-transform:capitalize'>" + names[k] + "</strong>: " + d.copy + " " + chainCopy[k] + "</p>";
       });
       if (topPillars.length >= 2) {
-        html += "<p>When <span class='sum-link'>" + topPillars[0] + "</span> and <span class='sum-link'>" + topPillars[1] + "</span> combine, nocturnal testosterone gets suppressed — which is exactly how a gut or stress problem <em>becomes</em> a sexual health problem.</p>";
+        html += "<p>When <span class='sum-link'>" + names[topPillars[0]] + "</span> and <span class='sum-link'>" + names[topPillars[1]] + "</span> combine, nocturnal testosterone gets suppressed — which is exactly how a gut or stress problem <em>becomes</em> a sexual health problem.</p>";
       }
       html += "<p>This is not a verdict — it's a <span class='sum-link'>map</span>. Your squad protocol reverses the chain in the same order it fell.</p>";
+    }
+    const missing = CAT_ORDER.filter((c) => quizState.flow.indexOf(c) < 0).map((c) => names[c]);
+    if (missing.length) {
+      html += "<p class='sum-muted'>You assessed " + quizState.flow.length + " of 4 areas (" + missing.join(", ") +
+        " not covered). The full map completes when you add the rest — retake the assessment anytime.</p>";
     }
     hl.textContent = headline;
     box.innerHTML = html;
@@ -305,56 +505,13 @@
     quadCaption.textContent = captions.gut;
   });
 
-  /* ── Track tabs (pricing) ────────────────── */
-  $$(".track-tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const track = tab.dataset.track;
-      $$(".track-tab").forEach((t) => { t.classList.toggle("active", t === tab); t.setAttribute("aria-selected", t === tab); });
-      $$(".price-card").forEach((c) => { c.hidden = c.dataset.track !== track; });
-    });
-  });
-
-  /* ── Plan select → checkout ──────────────── */
-  $$("[data-select-plan]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      sessionStorage.setItem("ojas-plan", JSON.stringify({
-        name: btn.dataset.name,
-        price: btn.dataset.price,
-        plan: btn.dataset.plan,
-        track: btn.dataset.track
-      }));
-      location.hash = "#/checkout";
-    });
-  });
-
   function fmt(n) { return Number(n).toLocaleString("en-IN"); }
-
-  function hydrateCheckout() {
-    let plan = null;
-    try { plan = JSON.parse(sessionStorage.getItem("ojas-plan")); } catch (e) { plan = null; }
-    if (!plan) {
-      plan = { name: "OJAS 60-Day Complete Vitality Program", price: "13450", plan: "sleep-60", track: "sleep" };
-      sessionStorage.setItem("ojas-plan", JSON.stringify(plan));
-    }
-    const title = $("#order-title");
-    const price = $("#order-price");
-    if (title) title.textContent = plan.name;
-    if (price) price.textContent = "₹" + fmt(plan.price);
-    $$(".pay-label").forEach((el) => { el.innerHTML = "Pay ₹<span data-pay-amount>" + fmt(plan.price) + "</span> Securely"; });
-    $$("[data-pay-amount]").forEach((el) => { el.textContent = fmt(plan.price); });
-  }
-
-  /* ── Payment method tabs ─────────────────── */
-  $$(".pay-tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const method = tab.dataset.method;
-      $$(".pay-tab").forEach((t) => t.classList.toggle("active", t === tab));
-      $$(".pay-panel").forEach((p) => { p.hidden = p.dataset.panel !== method; });
-    });
-  });
 
   /* ── Payment: backend-managed (Razorpay) with UPI-QR fallback ──
      Mode is detected at boot (detectBackend):
+     · ""        — unknown until the health probe settles; the pay
+                   button refuses clicks during this window so a
+                   booking can never slip through in the wrong mode.
      · razorpay  — the patient pays inside the Razorpay hosted checkout;
                    the server verifies the signature before anything moves
                    forward. There is NO "I've paid" tap — an unpaid payment
@@ -363,17 +520,10 @@
                    (money lands in the UPI VPA below); a manual confirm is
                    unavoidable because nobody can verify it server-side.
      · demo      — test mode (window.__OJAS_TEST__): instant fake pay. */
-  let payMode = "demo";
-  let payoutSuccess = [];
+  let payMode = "";
+  let paymentVerified = false;
   let confirmedBookingId = "";
   const API_BASE = location.protocol === "file:" ? "http://localhost:8787" : "";
-
-  function currentPlan() {
-    let plan = null;
-    try { plan = JSON.parse(sessionStorage.getItem("ojas-plan")); } catch (e) { plan = null; }
-    if (!plan) plan = { name: "OJAS 60-Day Complete Vitality Program", price: "13450", plan: "sleep-60", track: "sleep" };
-    return plan;
-  }
 
   async function detectBackend() {
     if (window.__OJAS_TEST__ === true) { payMode = "demo"; return; }
@@ -395,22 +545,29 @@
     return new Promise((res, rej) => {
       const s = document.createElement("script");
       s.src = "https://checkout.razorpay.com/v1/checkout.js";
-      s.onload = () => res(window.Razorpay);
-      s.onerror = () => rej(new Error("Razorpay checkout could not be loaded (check internet)"));
+      const to = setTimeout(() => { s.remove(); rej(new Error("Razorpay checkout could not be loaded (check internet)")); }, 8000);
+      s.onload = () => { clearTimeout(to); res(window.Razorpay); };
+      s.onerror = () => { clearTimeout(to); s.remove(); rej(new Error("Razorpay checkout could not be loaded (check internet)")); };
       document.head.appendChild(s);
     });
   }
 
-  function postJson(path, body) {
-    return fetch(API_BASE + path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    }).then(async (r) => {
+  async function postJson(path, body) {
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      const r = await fetch(API_BASE + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ctrl.signal
+      });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || ("HTTP " + r.status));
       return j;
-    });
+    } finally {
+      clearTimeout(to);
+    }
   }
 
   /* ── QR fallback flow (no gateway configured) ── */
@@ -425,7 +582,18 @@
     $("#qr-upi").textContent = QR_UPI;
     const uri = "upi://pay?pa=" + encodeURIComponent(QR_UPI) +
       "&pn=OJAS&am=" + rupees + "&cu=INR&tn=" + encodeURIComponent(label.slice(0, 60));
-    $("#qr-img").src = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(uri);
+    const img = $("#qr-img");
+    img.onerror = () => {
+      /* third-party QR service unreachable — degrade to the deep link */
+      const link = $("#qr-deeplink");
+      if (link) {
+        const a = link.querySelector("a");
+        a.href = uri;
+        link.hidden = false;
+        img.hidden = true;
+      }
+    };
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(uri);
     $("#qr-copy").textContent = "Copy UPI ID";
     $("#qr-copy").disabled = false;
     m.classList.add("show");
@@ -449,112 +617,11 @@
     if (cb) cb();
   });
 
-  /* ── Checkout (full programs) ─────────────────── */
-  let checkoutBusy = false;
-
-  function openCheckoutSuccess(plan) {
-    const success = $("#pay-success");
-    success.classList.add("show");
-    success.setAttribute("aria-hidden", "false");
-    const note = success.querySelector("p");
-    if (note) {
-      const failed = payoutSuccess.filter((w) => String(w).includes("failed"));
-      note.innerHTML = "Your payment is <strong>verified</strong> — receipt under <strong>ODW Digital Network</strong>. Your squad has been notified" +
-        (failed.length === 0 ? " and will reach out within 24 hours." : " (WhatsApp delivery pending setup: " + failed.join(", ") + ").");
-    }
-  }
-
-  $$("[data-pay]").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      if (checkoutBusy) return;
-      const plan = currentPlan();
-      const amount = Number(plan.price);
-
-      if (payMode === "demo") { payoutSuccess = []; openCheckoutSuccess(plan); return; }
-
-      if (payMode === "razorpay") {
-        checkoutBusy = true;
-        btn.disabled = true;
-        const nameEl = $("#pay-name"), phoneEl = $("#pay-phone");
-        const name = nameEl ? nameEl.value.trim() : "";
-        const phone = phoneEl ? phoneEl.value.trim().replace(/[^0-9]/g, "") : "";
-        try {
-          const order = await postJson("/api/order-create", {
-            kind: "plan",
-            amount: amount * 100,
-            notes: { name: name, phone: phone, detail: plan.name, plan: plan.plan }
-          });
-          const Rz = await loadRazorpay();
-          const rzp = new Rz({
-            key: order.key,
-            order_id: order.orderId,
-            amount: order.amount,
-            currency: "INR",
-            name: "OJAS",
-            description: plan.name,
-            prefill: { name: name.slice(0, 60), contact: phone ? "+91" + phone : undefined },
-            theme: { color: "#d4af37" },
-            redirect: true,
-            handler: async (resp) => {
-              try {
-                const v = await postJson("/api/verify", {
-                  kind: "plan",
-                  orderId: resp.razorpay_order_id,
-                  paymentId: resp.razorpay_payment_id,
-                  signature: resp.razorpay_signature,
-                  amount: amount,
-                  booking: { name: name, phone: phone, plan: plan.name, planId: plan.plan }
-                });
-                payoutSuccess = v.wa || [];
-                checkoutBusy = false;
-                btn.disabled = false;
-                openCheckoutSuccess(plan);
-              } catch (err) {
-                console.error(err);
-                checkoutBusy = false;
-                btn.disabled = false;
-                alert("Payment could not be verified: " + err.message);
-              }
-            },
-            modal: { ondismiss: () => { checkoutBusy = false; btn.disabled = false; } }
-          });
-          rzp.on("payment.failed", (resp) => {
-            checkoutBusy = false;
-            btn.disabled = false;
-            alert("Payment failed: " + ((resp.error && (resp.error.code || resp.error.description)) || "try again") + ". No amount was charged.");
-          });
-          rzp.open();
-        } catch (err) {
-          console.error(err);
-          checkoutBusy = false;
-          btn.disabled = false;
-          alert("Payment could not be started: " + err.message);
-        }
-        return;
-      }
-
-      /* qr fallback — payment is scanned & paid by the patient; the
-         booking then proceeds with a manual confirm (no server exists
-         in this mode to verify the payment). */
-      qrOnContinue = () => {
-        payoutSuccess = [];
-        openCheckoutSuccess(plan);
-      };
-      showQrPay(amount, plan.name);
-    });
-  });
-  $("#pay-success [data-close-success]").addEventListener("click", () => {
-    const success = $("#pay-success");
-    success.classList.remove("show");
-    success.setAttribute("aria-hidden", "true");
-    sessionStorage.removeItem("ojas-plan");
-    location.hash = "#/";
-  });
-
   /* ── Init ────────────────────────────────── */
   const prefs = { consent: localStorage.getItem("ojas-consent") };
-  hydrateCheckout();
+  /* a fresh load carries no quiz state — drop any stale hash so a
+     refresh lands on home instead of a dead screen */
+  if (location.hash) history.replaceState(null, "", "#/");
   navigate();
   detectBackend();
 
@@ -562,11 +629,6 @@
   if (!prefs.consent) {
     setTimeout(consentOpen, 600);
   }
-
-  /* rehydrate checkout whenever it becomes active */
-  window.addEventListener("hashchange", () => {
-    if (routes[location.hash.replace(/^#\/?/, "")] === "checkout") hydrateCheckout();
-  });
 
   /* ═══════════════ ₹99 CONSULT BOOKING ═══════════════ */
   const CONSULT_FEE = 99;
@@ -647,28 +709,58 @@
   $("#consult-close").addEventListener("click", closeConsult);
   consultModal.addEventListener("click", (e) => { if (e.target === consultModal) closeConsult(); });
 
-  function openConsult(pillar) {
-    consultCtx = { pillar: pillar || "gut" };
-    const spec = CONSULT_SPECS[PILLAR_TO_SPEC[consultCtx.pillar]] || CONSULT_SPECS.sexual;
-    const label = spec.tag;
+  function openConsult(pillars) {
+    /* a fresh booking session — never inherit "paid", a confirmed ref or
+       the previous slot from an earlier consult in the same visit */
+    paymentVerified = false;
+    confirmedBookingId = "";
+    selectedSlot = null;
+    slotSaving = false;
+    qrOnContinue = null;
+    resetPayBtn();
+    const perr = $("#pay-err");
+    if (perr) perr.hidden = true;
+    const list = (Array.isArray(pillars) ? pillars : [pillars]).filter(Boolean);
+    const specs = list.map((p) => CONSULT_SPECS[PILLAR_TO_SPEC[p]] || CONSULT_SPECS.sexual);
+    consultCtx = { pillar: list.length === 1 ? list[0] : "multi" };
+    const multi = list.length > 1;
+    const label = multi ? "FULL WELLNESS CONSULT · " + list.length + " AREAS" : specs[0].tag;
     $("#consult-pillar-tag").textContent = label;
     $("#consult-pay-tag").textContent = label;
-    $("#c-problem-label").textContent = spec.label;
+    $("#c-problem-label").textContent = multi ? "Your concerns (one per area)" : specs[0].label;
     $("#c-problem").innerHTML = "";
-    spec.options.forEach((opt) => {
-      const l = document.createElement("label");
-      l.className = "check-row";
-      const c = document.createElement("input");
-      c.type = "checkbox";
-      c.className = "cbox";
-      c.value = opt.indexOf("Other") === 0 ? "Other" : opt;
-      const s = document.createElement("span");
-      s.textContent = opt;
-      l.appendChild(c);
-      l.appendChild(s);
-      $("#c-problem").appendChild(l);
+    specs.forEach((spec, i) => {
+      const group = document.createElement("div");
+      if (multi) {
+        const h = document.createElement("h4");
+        h.className = "c-group-title";
+        h.textContent = pillarNames[list[i]] || specs[i].tag;
+        group.appendChild(h);
+      }
+      spec.options.forEach((opt) => {
+        const l = document.createElement("label");
+        l.className = "check-row";
+        const c = document.createElement("input");
+        c.type = "checkbox";
+        c.className = "cbox";
+        c.value = opt.indexOf("Other") === 0 ? "Other" : opt;
+        const s = document.createElement("span");
+        s.textContent = opt;
+        l.appendChild(c);
+        l.appendChild(s);
+        group.appendChild(l);
+      });
+      /* one free-text field per group, revealed only when that group's
+         own "Other" box is checked (multi-pillar forms have several) */
+      const otherInput = document.createElement("input");
+      otherInput.type = "text";
+      otherInput.className = "c-other-input";
+      otherInput.placeholder = spec.placeholder;
+      otherInput.autocomplete = "off";
+      otherInput.hidden = true;
+      group.appendChild(otherInput);
+      $("#c-problem").appendChild(group);
     });
-    $("#c-other").placeholder = spec.placeholder;
     $("#c-name").value = ""; $("#c-age").value = ""; $("#c-phone").value = "";
     $("#c-profession").value = ""; $("#c-city").value = "";
     $$("#c-problem .cbox").forEach((b) => { b.checked = false; });
@@ -692,9 +784,11 @@
   consultModal.addEventListener("change", (e) => {
     const box = e.target.closest("#c-problem .cbox");
     if (!box) return;
-    const other = box.value === "Other";
-    $("#c-other-field").hidden = !(other && box.checked);
-    if (other && box.checked) $("#c-other").focus();
+    if (box.value !== "Other") return;
+    const input = box.closest(".check-row").nextElementSibling;
+    if (!input || !input.classList.contains("c-other-input")) return;
+    input.hidden = !box.checked;
+    if (box.checked) input.focus();
   });
   $$("#c-duration .seg").forEach((b) => b.addEventListener("click", () => {
     $$("#c-duration .seg").forEach((x) => x.classList.remove("active"));
@@ -703,6 +797,7 @@
 
   /* details → payment */
   $("#consult-to-pay").addEventListener("click", () => {
+    try {
     const name = $("#c-name").value.trim();
     const age = $("#c-age").value.trim();
     const phone = $("#c-phone").value.trim();
@@ -729,14 +824,26 @@
       return;
     }
     const durBtn = $(".seg.active", $("#c-duration"));
-    const otherText = ($("#c-other").value || "").trim();
-    const worried = selected.some((b) => b.value === "Other");
     if (!durBtn) {
       err.textContent = "Please select how long this has been bothering you.";
       err.hidden = false;
       return;
     }
-    if (worried && !otherText) {
+    /* each pillar group keeps its own "Other" text — build the concern
+       list group by group so no free text leaks across groups */
+    const concernParts = [];
+    let missingOtherText = false;
+    $$("#c-problem > div").forEach((g) => {
+      const boxes = $$(".cbox", g).filter((b) => b.checked);
+      boxes.filter((b) => b.value !== "Other").forEach((b) => concernParts.push(b.value));
+      if (boxes.some((b) => b.value === "Other")) {
+        const inp = g.querySelector(".c-other-input");
+        const txt = (inp && inp.value || "").trim();
+        if (!txt) missingOtherText = true;
+        else concernParts.push(txt);
+      }
+    });
+    if (missingOtherText) {
       err.textContent = "Please tell us your concern in a few words.";
       err.hidden = false;
       return;
@@ -745,18 +852,23 @@
 
     consultCtx = Object.assign(consultCtx, {
       name, age: n, phone, profession, city,
-      concern: selected.map((b) => b.value === "Other" ? otherText : b.value).join(", "),
+      concern: concernParts.join(", "),
       duration: durBtn.dataset.v
     });
     $("#consult-summary-line").textContent =
       consultCtx.name + " · " + consultCtx.age + " yrs · " + consultCtx.city + " · " + consultCtx.concern + " (" + consultCtx.duration + ")";
     $("#consult-amount").textContent = "₹" + CONSULT_FEE;
     consultSteps.forEach((s) => s.classList.toggle("show", s.dataset.consultStep === "payment"));
+    document.querySelectorAll('iframe[src*="checkout.razorpay.com"]').forEach((f) => { (f.parentElement || f).remove(); });
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   /* payment → verified checkout (razorpay) / scan-pay QR (fallback) / demo */
   const payBtn = $("#consult-pay-btn");
   let payInFlight = false;
+  let verifyInFlight = false;
   function resetPayBtn() {
     payInFlight = false;
     payBtn.disabled = false;
@@ -771,11 +883,17 @@
     if (payInFlight) return;
     payErr("");
 
+    if (!payMode) {
+      payErr("Payment mode is still being verified — please try again in a moment.");
+      detectBackend();
+      return;
+    }
+
     if (payMode === "demo") {
       payInFlight = true;
       payBtn.disabled = true;
       payBtn.innerHTML = "<span>Processing payment…</span>";
-      setTimeout(() => { resetPayBtn(); afterPayment(); }, 1200);
+      setTimeout(() => { paymentVerified = true; resetPayBtn(); afterPayment(); }, 1200);
       return;
     }
 
@@ -790,7 +908,7 @@
           amount: CONSULT_FEE * 100,
           notes: {
             name: c.name, phone: c.phone, city: c.city,
-            detail: pillarNames[c.pillar] + " consult", concern: c.concern
+            detail: (c.pillar === "multi" ? "Full wellness" : pillarNames[c.pillar]) + " consult", concern: c.concern
           }
         });
         const Rz = await loadRazorpay();
@@ -800,39 +918,63 @@
           amount: order.amount,
           currency: "INR",
           name: "OJAS",
-          description: pillarNames[c.pillar] + " Consult",
+          description: (c.pillar === "multi" ? "Full wellness" : pillarNames[c.pillar]) + " Consult",
           prefill: { name: c.name, contact: "+91" + c.phone },
           theme: { color: "#d4af37" },
-          redirect: true,
           handler: async (resp) => {
+            if (verifyInFlight) return;
+            verifyInFlight = true;
+            const payload = {
+              kind: "consult",
+              orderId: resp.razorpay_order_id,
+              paymentId: resp.razorpay_payment_id,
+              signature: resp.razorpay_signature,
+              booking: {
+                name: c.name, age: c.age, phone: c.phone, city: c.city,
+                profession: c.profession, concern: c.concern, duration: c.duration, pillar: c.pillar === "multi" ? "Full wellness" : pillarNames[c.pillar]
+              }
+            };
             try {
-              const v = await postJson("/api/verify", {
-                kind: "consult",
-                orderId: resp.razorpay_order_id,
-                paymentId: resp.razorpay_payment_id,
-                signature: resp.razorpay_signature,
-                amount: CONSULT_FEE,
-                booking: {
-                  name: c.name, age: c.age, phone: c.phone, city: c.city,
-                  profession: c.profession, concern: c.concern, duration: c.duration, pillar: pillarNames[c.pillar]
-                }
-              });
-              payoutSuccess = v.wa || [];
+              /* one safe retry for transient gateway hiccups — the server
+                 is idempotent: an already-verified payment is never logged
+                 twice, so a retry can never double-book */
+              let v = null;
+              for (let attempt = 0; attempt < 2; attempt++) {
+                try { v = await postJson("/api/verify", payload); break; }
+                catch (e) { if (attempt === 0) await sleep(1500); else throw e; }
+              }
+              paymentVerified = true;
               confirmedBookingId = v.bookingId || "";
               afterPayment();
+              resetPayBtn();
             } catch (err) {
               console.error(err);
-              payErr("Payment could not be verified: " + err.message);
+              /* do NOT re-enable the pay button here — the capture may
+                 already have settled and a second charge would double-bill */
+              payErr("Payment received but verification is pending (" + err.message + "). Nothing has been logged yet — close this window and try the payment again in a moment; if you were charged, the clinic will confirm manually.");
+            } finally {
+              verifyInFlight = false;
             }
-            resetPayBtn();
           },
-          modal: { ondismiss: () => { resetPayBtn(); } }
+          modal: { ondismiss: () => { if (!verifyInFlight) resetPayBtn(); } }
         });
         rzp.on("payment.failed", (resp) => {
           payErr("Payment failed: " + ((resp.error && (resp.error.code || resp.error.description)) || "try again") + ". No amount was charged.");
           resetPayBtn();
         });
+        document.querySelectorAll('iframe[src*="checkout.razorpay.com"]').forEach((f) => { (f.parentElement || f).remove(); });
         rzp.open();
+        setTimeout(() => {
+          document.querySelectorAll('iframe[src*="checkout.razorpay.com"]').forEach((f) => {
+            let p = f.parentElement;
+            while (p && p !== document.body) {
+              const cs = window.getComputedStyle(p);
+              if (cs.position === "fixed" || cs.position === "absolute") break;
+              p = p.parentElement;
+            }
+            if (p && p.style) p.style.zIndex = "9990";
+          });
+        }, 800);
       } catch (err) {
         console.error(err);
         payErr("Payment could not be started: " + err.message);
@@ -841,14 +983,22 @@
       return;
     }
 
-    /* qr fallback — patient scans, pays, confirms manually */
-    qrOnContinue = () => { payoutSuccess = []; afterPayment(); };
+    /* qr fallback — patient scans, pays, confirms manually (unverified) */
+    qrOnContinue = () => { afterPayment(); };
     showQrPay(CONSULT_FEE, "OJAS Consult");
   });
 
   function afterPayment() {
     resetPayBtn();
     renderSlots();
+    const title = $("#consult-timeslot-title");
+    if (title) title.textContent = paymentVerified
+      ? "Payment received — consultation confirmed"
+      : "Slot request sent — payment verification pending";
+    const sub = $("#consult-sub-line");
+    if (sub) sub.innerHTML = paymentVerified
+      ? "Your doctor's call is booked for <strong class=\"gold\">" + dateLabel() + "</strong>. Pick a time below."
+      : "Once your payment clears, we'll confirm your call for <strong class=\"gold\">" + dateLabel() + "</strong>. Pick a preferred time below.";
     consultSteps.forEach((s) => s.classList.toggle("show", s.dataset.consultStep === "timeslot"));
   }
 
@@ -863,12 +1013,26 @@
 
   let selectedSlot = null;
   function renderSlots() {
-    selectedSlot = null;
     $("#consult-confirm-slot").disabled = true;
     $("#slot-err").hidden = true;
     $("#consult-date").textContent = dateLabel();
     const taken = consultationsTaken().reduce((acc, b) => (acc[b.slot] = true, acc), {});
+    /* server-side slot registry (razorpay mode) — merged with the local
+       record; any failure falls back to local data only */
+    if (payMode === "razorpay") {
+      fetch(API_BASE + "/api/slots?date=" + encodeURIComponent(dateLabel()))
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => [])
+        .then((occ) => { if (Array.isArray(occ)) { occ.forEach((s) => (taken[s] = true)); paintSlots(taken); } });
+    }
+    paintSlots(taken);
+  }
+
+  function paintSlots(taken) {
     const grid = $("#consult-slots");
+    const prev = selectedSlot;
+    const keeping = prev && !taken[prev];
+    if (!keeping) { selectedSlot = null; $("#consult-confirm-slot").disabled = true; }
     grid.innerHTML = "";
     SLOTS.forEach((t) => {
       const b = document.createElement("button");
@@ -876,6 +1040,7 @@
       b.className = "slot-btn" + (taken[t] ? " is-taken" : "");
       b.textContent = t;
       b.disabled = !!taken[t];
+      if (keeping && t === prev) b.classList.add("active");
       b.addEventListener("click", () => {
         $$(".slot-btn", grid).forEach((x) => x.classList.remove("active"));
         b.classList.add("active");
@@ -915,26 +1080,16 @@
   /* the messages that get delivered */
   function deliverMessages() {
     const c = consultCtx;
+    const paid = paymentVerified ? "Fee ₹" + CONSULT_FEE + " PAID" : "Fee ₹" + CONSULT_FEE + " — payment pending verification";
+    const status = paymentVerified ? "CONFIRMED" : "REQUESTED (pending payment verification)";
     return [
-      { to: "Patient (" + c.phone + ")", body: "OJAS — your ₹" + CONSULT_FEE + " consultation is CONFIRMED. Call on " + dateLabel() + " at " + selectedSlot + ". A reminder will follow tomorrow. OJAS Care" },
-      { to: "Care team", body: "NEW OJAS CONSULT — " + c.name + " · " + c.age + " yrs · " + c.city + " · " + c.profession + " · Concern: " + c.concern + " (" + c.duration + ") · Phone +91 " + c.phone + " · Fee ₹" + CONSULT_FEE + " PAID · Call on " + dateLabel() + "." },
+      { to: "Patient (" + c.phone + ")", body: "OJAS — your ₹" + CONSULT_FEE + " consultation is " + status + ". Call on " + dateLabel() + " at " + selectedSlot + ". A reminder will follow tomorrow. OJAS Care" },
+      { to: "Care team", body: "NEW OJAS CONSULT — " + c.name + " · " + c.age + " yrs · " + c.city + " · " + c.profession + " · Concern: " + c.concern + " (" + c.duration + ") · Phone +91 " + c.phone + " · " + paid + " · Call on " + dateLabel() + "." },
       { to: "Care team", body: "Time chosen by " + c.name + " for " + dateLabel() + ": " + selectedSlot + "." }
     ];
   }
 
-  function renderSmsPreview() {
-    const panel = $("#sms-preview");
-    panel.innerHTML = "";
-    deliverMessages().forEach((m) => {
-      const d = document.createElement("div");
-      d.className = "sms-bubble";
-      const b = document.createElement("strong");
-      b.textContent = "SMS → " + m.to;
-      const t = document.createElement("p");
-      t.textContent = m.body;
-      d.appendChild(b); d.appendChild(t);
-      panel.appendChild(d);
-    });
+  function pushSmsWebhook() {
     if (CONSULT_LIVE.smsWebhook) {
       fetch(CONSULT_LIVE.smsWebhook, {
         method: "POST",
@@ -945,10 +1100,18 @@
   }
 
   /* confirm → save + preview + finish (payment already verified) */
+  let slotSaving = false;
   $("#consult-confirm-slot").addEventListener("click", async () => {
+    if (slotSaving) return;
     if (!selectedSlot) { $("#slot-err").hidden = false; return; }
+    slotSaving = true;
+    $("#consult-confirm-slot").disabled = true;
     const id = saveConsultation();
-    renderSmsPreview();
+    const refEl = $("#consult-ref");
+    if (refEl) refEl.textContent = id;
+    const slotEl = $("#consult-slot");
+    if (slotEl) slotEl.textContent = dateLabel() + " · " + selectedSlot;
+    pushSmsWebhook();
     const c = consultCtx;
     let waResult = [];
     if (confirmedBookingId) {
@@ -962,14 +1125,10 @@
         waResult = r.wa || [];
       } catch (err) { waResult = ["clinic-failed: " + err.message]; }
     }
-    const waNote = $("#consult-wa-note");
-    if (waNote) {
-      const failed = waResult.filter((w) => String(w).includes("failed"));
-      waNote.textContent = failed.length
-        ? "Care team WhatsApp push pending setup (" + failed.join(", ") + ")."
-        : "Your care team has been notified automatically.";
-      waNote.hidden = false;
-    }
+    const doneSub = $("#consult-done-sub");
+    if (doneSub) doneSub.textContent = paymentVerified
+      ? "Confirmation sent to your phone and your care team. Show-up reminders have also been booked."
+      : "Your slot request is logged. Payment verification is pending — the care team will confirm once it clears.";
     consultSteps.forEach((s) => s.classList.toggle("show", s.dataset.consultStep === "done"));
   });
 

@@ -47,9 +47,8 @@
       <a href="#/" data-nav>Home</a>
       <a href="#/science" data-nav>About &amp; Science</a>
       <a href="#/diagnostic" data-nav>Diagnostic</a>
-      <a href="#/programs" data-nav>Programs</a>
       <a href="#/panel" data-nav>Medical Panel</a>
-      <a href="#/diagnostic" class="btn btn-gold btn-sm" data-nav>Take the Assessment</a>
+      <a href="#/diagnostic" class="btn btn-gold btn-sm" data-nav>Know Your Root Cause</a>
     </nav>
     <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -72,8 +71,7 @@
         <h1 class="hero-title">Total Men's Vitality:<br><em>Sleep, Gut, Mind &amp; Performance.</em></h1>
         <p class="hero-sub">Ojas (ॐ) — reclaiming life force through a unified, multi-specialist clinical ecosystem. One assessment. One squad. One protocol that treats the root cause, not the symptom.</p>
         <div class="hero-ctas">
-          <a href="#/diagnostic" class="btn btn-gold" data-nav>Take the 2-Min Health Assessment</a>
-          <a href="#/programs" class="btn btn-outline" data-nav>Explore Programs</a>
+          <a href="#/diagnostic" class="btn btn-gold" data-nav>Know Your Root Cause</a>
         </div>
         <div class="hero-proof">
           <span><strong>6+</strong> Specialist Tracks</span>
@@ -176,7 +174,7 @@
       <div class="container">
         <h2>Your body is telling you something.<br>It's time to answer.</h2>
         <p>2 minutes. 4 pillars. One root-cause map.</p>
-        <a href="#/diagnostic" class="btn btn-gold btn-lg" data-nav>Take the 2-Min Health Assessment</a>
+        <a href="#/diagnostic" class="btn btn-gold btn-lg" data-nav>Know Your Root Cause</a>
       </div>
     </section>
 
@@ -311,10 +309,10 @@
       <div class="quiz-screen quiz-intro" data-screen="intro">
         <div class="quiz-card">
           <span class="quiz-badge">Assessment</span>
-          <h2>Let's map your chain</h2>
-          <p>You'll answer 4 quick sections — Gut, Emotional, Sleep and Sexual. Everything stays private, consent is yours, and you can delete your data anytime.</p>
+          <h2>Choose what to assess</h2>
+          <p>Pick the areas that bother you — we'll only ask questions for the ones you choose. Nothing forced, nothing skipped.</p>
           <ul class="quiz-facts">
-            <li>⏱ 2 minutes</li>
+            <li>⏱ ~1 minute per area</li>
             <li>🔒 DPDP Act, 2023 compliant</li>
             <li>📊 Instant visual results</li>
           </ul>
@@ -326,152 +324,61 @@
       <div class="quiz-progress" id="quiz-progress" hidden>
         <div class="quiz-progress-track"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
         <div class="quiz-progress-labels">
-          <span class="qstep qs-gut">Gut</span><span class="qstep qs-mind">Emotional</span>
-          <span class="qstep qs-sleep">Sleep</span><span class="qstep qs-sexual">Sexual</span>
+          <span class="qstep-count" id="quiz-step-count">Step 1 of 1</span>
         </div>
       </div>
 
-      <!-- Step 1: Gut -->
-      <div class="quiz-screen" data-screen="gut" hidden>
+      <!-- Category picker -->
+      <div class="quiz-screen" data-screen="picker" hidden>
         <div class="quiz-card">
-          <span class="quiz-badge badge-gut">Pillar 1 of 4 · Gut</span>
-          <h2>How does your gut behave?</h2>
-          <div class="quiz-q">
-            <p class="quiz-q-label">1. How often do you feel acidity or reflux after meals?</p>
-            <div class="seg-group" data-q="gut-acidity">
-              <button class="seg" data-v="0">Rarely</button>
-              <button class="seg" data-v="1">Weekly</button>
-              <button class="seg" data-v="2">Several times a week</button>
-              <button class="seg" data-v="3">Daily</button>
-            </div>
+          <span class="quiz-badge">Assessment</span>
+          <h2>Which areas bother you?</h2>
+          <p>Select all that apply — the rest stay out of the assessment entirely.</p>
+          <div class="cat-grid" id="cat-grid">
+            <button type="button" class="cat-card" data-cat="sexual">
+              <span class="cat-glyph">🔥</span>
+              <strong>Sexual Health</strong>
+              <small>ED · stamina · libido · performance anxiety</small>
+            </button>
+            <button type="button" class="cat-card" data-cat="sleep">
+              <span class="cat-glyph">🌙</span>
+              <strong>Sleep Improvement</strong>
+              <small>Falling asleep · night waking · exhausted mornings</small>
+            </button>
+            <button type="button" class="cat-card" data-cat="gut">
+              <span class="cat-glyph">🫁</span>
+              <strong>Gut Health</strong>
+              <small>Bloating · bowel · acidity · energy after meals</small>
+            </button>
+            <button type="button" class="cat-card" data-cat="mind">
+              <span class="cat-glyph">🧠</span>
+              <strong>Emotional Well-Being</strong>
+              <small>Stress · anxiety · burnout · mood swings</small>
+            </button>
           </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">2. How often do you feel bloated or heavy after eating?</p>
-            <div class="seg-group" data-q="gut-bloating">
-              <button class="seg" data-v="0">Rarely</button>
-              <button class="seg" data-v="1">Weekly</button>
-              <button class="seg" data-v="2">Several times a week</button>
-              <button class="seg" data-v="3">Daily</button>
-            </div>
+          <button class="btn-link" id="select-all-cats" type="button">Select all</button>
+          <div class="quiz-nav">
+            <button class="btn btn-outline" data-prev-step>Back</button>
+            <button class="btn btn-gold" data-picker-continue disabled>Continue</button>
           </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">3. After a heavy meal, how long does the meal "sit" before digestion feels settled?</p>
-            <div class="seg-group" data-q="gut-digestion">
-              <button class="seg" data-v="0">Under an hour</button>
-              <button class="seg" data-v="1">1–2 hours</button>
-              <button class="seg" data-v="2">2–4 hours</button>
-              <button class="seg" data-v="3">Most of the day</button>
-            </div>
-          </div>
+        </div>
+      </div>
+
+      <!-- Category checklist (reused per chosen area) -->
+      <div class="quiz-screen" data-screen="category" hidden>
+        <div class="quiz-card">
+          <span class="quiz-badge" id="cat-badge">Sexual Health Assessment</span>
+          <h2 id="cat-title">Sexual Health Assessment</h2>
+          <p>Tick every symptom that applies to you. This stays private and encrypted.</p>
+          <div class="consult-choices" id="cat-symptoms"></div>
+          <label class="field cat-notes">
+            <span>Other symptoms or specific notes…</span>
+            <input type="text" id="cat-note" placeholder="e.g. How often, what triggers it, anything the doctor should know" autocomplete="off">
+          </label>
+          <p class="quiz-invalid" id="cat-invalid" hidden>Select at least one symptom — or add a note — to continue.</p>
           <div class="quiz-nav">
             <button class="btn btn-outline" data-prev-step>Back</button>
             <button class="btn btn-gold" data-next-step disabled>Continue</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Emotional -->
-      <div class="quiz-screen" data-screen="mind" hidden>
-        <div class="quiz-card">
-          <span class="quiz-badge badge-mind">Pillar 2 of 4 · Emotional</span>
-          <h2>How heavy is your mental load?</h2>
-          <div class="quiz-q">
-            <p class="quiz-q-label">4. Professional burnout — how drained do you feel at the end of a workday?</p>
-            <input type="range" min="1" max="10" value="5" class="slider" data-q="mind-burnout">
-            <div class="slider-labels"><span>Refreshed</span><span class="slider-val" data-val-for="mind-burnout">5</span><span>Burned out</span></div>
-          </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">5. How often does stress feel physically present (tight chest, tension, restlessness)?</p>
-            <input type="range" min="1" max="10" value="5" class="slider" data-q="mind-stress">
-            <div class="slider-labels"><span>Never</span><span class="slider-val" data-val-for="mind-stress">5</span><span>Constant</span></div>
-          </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">6. Unprovoked irritability — how easily do small things set you off?</p>
-            <input type="range" min="1" max="10" value="5" class="slider" data-q="mind-irritability">
-            <div class="slider-labels"><span>Even-keeled</span><span class="slider-val" data-val-for="mind-irritability">5</span><span>Very short fuse</span></div>
-          </div>
-          <div class="quiz-nav">
-            <button class="btn btn-outline" data-prev-step>Back</button>
-            <button class="btn btn-gold" data-next-step>Continue</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 3: Sleep -->
-      <div class="quiz-screen" data-screen="sleep" hidden>
-        <div class="quiz-card">
-          <span class="quiz-badge badge-sleep">Pillar 3 of 4 · Sleep</span>
-          <h2>What does your night actually look like?</h2>
-          <div class="quiz-q">
-            <p class="quiz-q-label">7. Average sleep per night?</p>
-            <div class="seg-group" data-q="sleep-duration">
-              <button class="seg" data-v="0">7+ hours</button>
-              <button class="seg" data-v="1">6–7 hours</button>
-              <button class="seg" data-v="2">5–6 hours</button>
-              <button class="seg" data-v="3">Under 5 hours</button>
-            </div>
-          </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">8. How often do you wake up in the middle of the night?</p>
-            <div class="seg-group" data-q="sleep-interruptions">
-              <button class="seg" data-v="0">Rarely</button>
-              <button class="seg" data-v="1">1–2 nights a week</button>
-              <button class="seg" data-v="2">3–5 nights a week</button>
-              <button class="seg" data-v="3">Every night</button>
-            </div>
-          </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">9. How do you feel when you wake up?</p>
-            <div class="seg-group" data-q="sleep-fatigue">
-              <button class="seg" data-v="0">Refreshed</button>
-              <button class="seg" data-v="1">Slightly groggy</button>
-              <button class="seg" data-v="2">Mostly tired</button>
-              <button class="seg" data-v="3">Exhausted</button>
-            </div>
-          </div>
-          <div class="quiz-nav">
-            <button class="btn btn-outline" data-prev-step>Back</button>
-            <button class="btn btn-gold" data-next-step>Continue</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4: Sexual -->
-      <div class="quiz-screen" data-screen="sexual" hidden>
-        <div class="quiz-card">
-          <span class="quiz-badge badge-sexual">Pillar 4 of 4 · Sexual</span>
-          <h2>Now, the fourth pillar.</h2>
-          <p class="quiz-private">Private by default — your answers are encrypted and never leave your case file.</p>
-          <div class="quiz-q">
-            <p class="quiz-q-label">10. Performance anxiety — how much does the fear of performance affect intimacy?</p>
-            <div class="seg-group" data-q="sexual-anxiety">
-              <button class="seg" data-v="0">Not at all</button>
-              <button class="seg" data-v="1">Occasionally</button>
-              <button class="seg" data-v="2">Often</button>
-              <button class="seg" data-v="3">Almost always</button>
-            </div>
-          </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">11. Stamina — how would you rate your physical endurance during intimacy?</p>
-            <div class="seg-group" data-q="sexual-stamina">
-              <button class="seg" data-v="0">Strong</button>
-              <button class="seg" data-v="1">Moderate</button>
-              <button class="seg" data-v="2">Below average</button>
-              <button class="seg" data-v="3">Weak</button>
-            </div>
-          </div>
-          <div class="quiz-q">
-            <p class="quiz-q-label">12. Morning vitality — how is your morning erection / drive frequency?</p>
-            <div class="seg-group" data-q="sexual-morning">
-              <button class="seg" data-v="0">Strong, most days</button>
-              <button class="seg" data-v="1">Present, variable</button>
-              <button class="seg" data-v="2">Rare</button>
-              <button class="seg" data-v="3">Absent</button>
-            </div>
-          </div>
-          <div class="quiz-nav">
-            <button class="btn btn-outline" data-prev-step>Back</button>
-            <button class="btn btn-gold" data-submit-quiz>Submit &amp; Generate My Matrix</button>
           </div>
         </div>
       </div>
@@ -481,7 +388,7 @@
         <div class="quiz-card quiz-computing">
           <div class="compute-ring"><span>ॐ</span></div>
           <h2>Tracing your domino chain…</h2>
-          <p id="compute-status">Mapping gut → serotonin → cortisol → testosterone</p>
+          <p id="compute-status">Mapping your selected areas…</p>
         </div>
       </div>
     </div>
@@ -545,6 +452,7 @@
             <div class="pbar" data-pillar="sleep"><span class="pbar-name">Sleep</span><div class="pbar-track"><div class="pbar-fill pf-sleep"></div></div><span class="pbar-val" id="pval-sleep">0</span></div>
             <div class="pbar" data-pillar="sexual"><span class="pbar-name">Sexual</span><div class="pbar-track"><div class="pbar-fill pf-sexual"></div></div><span class="pbar-val" id="pval-sexual">0</span></div>
           </div>
+          <p class="map-solo-note" id="map-solo-note" hidden>1 area assessed — add the rest to trace the full chain.</p>
         </div>
 
         <aside class="results-summary">
@@ -552,7 +460,7 @@
           <h2 id="summary-headline">Your root-cause reading</h2>
           <div id="summary-text"></div>
           <div class="summary-cta">
-            <a href="#/programs" class="btn btn-gold btn-block" data-nav>Unlock My Custom Treatment Plan</a>
+            <button class="btn btn-gold btn-block" id="results-consult">Book Specialist Consult · ₹99</button>
             <button class="btn-link" data-restart-quiz>Retake assessment</button>
           </div>
         </aside>
@@ -561,252 +469,7 @@
 
   </section>
 
-  <!-- ══════════ PAGE 4 — PROGRAMS & TRANSPARENT PRICING ══════════ -->
-  <section class="page page-programs" data-page="programs">
-
-    <header class="page-hero page-hero-narrow">
-      <div class="container">
-        <p class="eyebrow center">Programs &amp; Transparent Pricing</p>
-        <h1 class="center">Every rupee on the table.<br><em>No hidden tiers, no asterisks.</em></h1>
-        <p class="page-hero-sub center">Two tracks. Three durations. Every consult and every month of medication itemised — before you pay.</p>
-      </div>
-    </header>
-
-    <section class="section">
-      <div class="container">
-        <div class="track-tabs" role="tablist" aria-label="Program tracks">
-          <button class="track-tab active" data-track="sleep" role="tab" aria-selected="true">Sleep &amp; Mind Track</button>
-          <button class="track-tab" data-track="sexual" role="tab" aria-selected="false">Sexual Vitality Track</button>
-        </div>
-
-        <div class="pricing-grid" id="pricing-grid">
-          <!-- Sleep & Mind cards -->
-          <article class="price-card" data-track="sleep" data-plan="sleep-30" data-price="7500">
-            <span class="price-duration">30-Day Sprint</span>
-            <h3>Sleep &amp; Mind · Sprint</h3>
-            <p class="price-amount">₹7,500</p>
-            <ul class="price-list">
-              <li>5 specialist consults</li>
-              <li>1 month medication &amp; protocol</li>
-              <li>Sleep &amp; stress coaching</li>
-              <li>Shared squad case file</li>
-            </ul>
-            <button class="btn btn-outline btn-block" data-select-plan data-track="sleep" data-plan="sleep-30" data-name="OJAS 30-Day Sleep & Mind Program" data-price="7500">Select Program</button>
-          </article>
-          <article class="price-card featured" data-track="sleep" data-plan="sleep-60" data-price="13450">
-            <span class="price-duration">60-Day Recovery</span>
-            <span class="price-pop">Most Popular</span>
-            <h3>Sleep &amp; Mind · Recovery</h3>
-            <p class="price-amount">₹13,450</p>
-            <ul class="price-list">
-              <li>10 specialist consults</li>
-              <li>2 months medication &amp; protocol</li>
-              <li>Sleep architecture lab review</li>
-              <li>Weekly squad note updates</li>
-            </ul>
-            <button class="btn btn-gold btn-block" data-select-plan data-track="sleep" data-plan="sleep-60" data-name="OJAS 60-Day Complete Vitality Program" data-price="13450">Select Program</button>
-          </article>
-          <article class="price-card" data-track="sleep" data-plan="sleep-90" data-price="16950">
-            <span class="price-duration">90-Day Transformation</span>
-            <h3>Sleep &amp; Mind · Transformation</h3>
-            <p class="price-amount">₹16,950</p>
-            <ul class="price-list">
-              <li>15 specialist consults</li>
-              <li>3 months medication &amp; protocol</li>
-              <li>Deep sleep + cortisol tracking</li>
-              <li>Relapse-prevention review</li>
-            </ul>
-            <button class="btn btn-outline btn-block" data-select-plan data-track="sleep" data-plan="sleep-90" data-name="OJAS 90-Day Total Vitality Transformation" data-price="16950">Select Program</button>
-          </article>
-
-          <!-- Sexual Vitality cards -->
-          <article class="price-card" data-track="sexual" data-plan="sexual-30" data-price="9450" hidden>
-            <span class="price-duration">30-Day Sprint</span>
-            <h3>Sexual Vitality · Sprint</h3>
-            <p class="price-amount">₹9,450</p>
-            <ul class="price-list">
-              <li>5 MD andrologist consults</li>
-              <li>Vitality Box (month 1)</li>
-              <li>Performance-anxiety coaching</li>
-              <li>Discreet, unbranded delivery</li>
-            </ul>
-            <button class="btn btn-outline btn-block" data-select-plan data-track="sexual" data-plan="sexual-30" data-name="OJAS 30-Day Sexual Vitality Program" data-price="9450">Select Program</button>
-          </article>
-          <article class="price-card featured" data-track="sexual" data-plan="sexual-60" data-price="18450" hidden>
-            <span class="price-duration">60-Day Recovery</span>
-            <span class="price-pop">Most Popular</span>
-            <h3>Sexual Vitality · Recovery</h3>
-            <p class="price-amount">₹18,450</p>
-            <ul class="price-list">
-              <li>10 MD andrologist consults</li>
-              <li>Vitality Box (2 months)</li>
-              <li>Hormone panel interpretation</li>
-              <li>Weekly squad note updates</li>
-            </ul>
-            <button class="btn btn-gold btn-block" data-select-plan data-track="sexual" data-plan="sexual-60" data-name="OJAS 60-Day Complete Vitality Program" data-price="18450">Select Program</button>
-          </article>
-          <article class="price-card" data-track="sexual" data-plan="sexual-90" data-price="25950" hidden>
-            <span class="price-duration">90-Day Transformation</span>
-            <h3>Sexual Vitality · Transformation</h3>
-            <p class="price-amount">₹25,950</p>
-            <ul class="price-list">
-              <li>15 MD andrologist consults</li>
-              <li>Full vitality kit (3 months)</li>
-              <li>Testosterone + biomarker tracking</li>
-              <li>Relapse-prevention review</li>
-            </ul>
-            <button class="btn btn-outline btn-block" data-select-plan data-track="sexual" data-plan="sexual-90" data-name="OJAS 90-Day Sexual Vitality Transformation" data-price="25950">Select Program</button>
-          </article>
-        </div>
-
-        <p class="pricing-note">All programs include the 4-quadrant diagnostic, shared squad case file, and 100% unbranded delivery. GST included. Cancellation within 48 hours of first consult is fully refundable.</p>
-      </div>
-    </section>
-
-  </section>
-
-  <!-- ══════════ PAGE 5 — DISCREET CHECKOUT ══════════ -->
-  <section class="page page-checkout" data-page="checkout">
-
-    <header class="page-hero page-hero-narrow">
-      <div class="container">
-        <p class="eyebrow center">Secure Checkout</p>
-        <h1 class="center">Private checkout.<br><em>Nothing about this is visible.</em></h1>
-      </div>
-    </header>
-
-    <section class="section">
-      <div class="container checkout-layout">
-        <div class="checkout-main">
-          <div class="checkout-card">
-            <h2>1 · Program summary</h2>
-            <div class="order-summary" id="order-summary">
-              <div class="order-row">
-                <div>
-                  <span class="order-neutral-tag">Neutral title</span>
-                  <p class="order-title" id="order-title">OJAS 60-Day Complete Vitality Program</p>
-                  <p class="order-detail" id="order-detail">10 specialist consults · 2 months protocol</p>
-                </div>
-                <p class="order-price" id="order-price">₹13,450</p>
-              </div>
-              <div class="order-row">
-                <span>Change program</span>
-                <a href="#/programs" class="btn-link" data-nav>Browse programs</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="checkout-card">
-            <h2>2 · Discretion guarantees</h2>
-            <div class="discretion-grid">
-              <div class="discretion-item">
-                <span class="disc-icon">🏦</span>
-                <h3>Bank statement descriptor</h3>
-                <p>Your statement will read <strong>"ODW Digital Network"</strong> — no medical or brand references, ever.</p>
-              </div>
-              <div class="discretion-item">
-                <span class="disc-icon">📦</span>
-                <h3>Unbranded plain box</h3>
-                <p>Delivery arrives in a plain brown box with no exterior medical or brand logos. Return address is neutral.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="checkout-card">
-            <h2>3 · Payment</h2>
-            <div class="field-row">
-              <label class="field">
-                <span>Your name</span>
-                <input type="text" id="pay-name" placeholder="e.g. Rahul Sharma" autocomplete="name">
-              </label>
-              <label class="field">
-                <span>WhatsApp number</span>
-                <input type="tel" id="pay-phone" placeholder="10-digit mobile" inputmode="numeric" maxlength="10" autocomplete="tel">
-              </label>
-            </div>
-            <div class="pay-methods" role="tablist">
-              <button class="pay-tab active" data-method="upi">UPI</button>
-              <button class="pay-tab" data-method="card">Cards</button>
-              <button class="pay-tab" data-method="netbanking">NetBanking</button>
-            </div>
-            <div class="pay-panel" data-panel="upi">
-              <label class="field">
-                <span>UPI ID</span>
-                <input type="text" placeholder="yourname@okhdfcbank" id="upi-id">
-              </label>
-              <button class="btn btn-gold btn-block" data-pay><span class="pay-label">Pay ₹<span data-pay-amount>13,450</span> Securely</span></button>
-            </div>
-            <div class="pay-panel" data-panel="card" hidden>
-              <label class="field">
-                <span>Card number</span>
-                <input type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" id="card-number">
-              </label>
-              <div class="field-row">
-                <label class="field">
-                  <span>Expiry</span>
-                  <input type="text" placeholder="MM/YY" id="card-expiry">
-                </label>
-                <label class="field">
-                  <span>CVV</span>
-                  <input type="password" placeholder="•••" maxlength="4" id="card-cvv">
-                </label>
-              </div>
-              <button class="btn btn-gold btn-block" data-pay><span class="pay-label">Pay ₹<span data-pay-amount>13,450</span> Securely</span></button>
-            </div>
-            <div class="pay-panel" data-panel="netbanking" hidden>
-              <label class="field">
-                <span>Select your bank</span>
-                <select id="bank-select">
-                  <option>HDFC Bank</option>
-                  <option>ICICI Bank</option>
-                  <option>State Bank of India</option>
-                  <option>Axis Bank</option>
-                  <option>Other bank</option>
-                </select>
-              </label>
-              <button class="btn btn-gold btn-block" data-pay><span class="pay-label">Pay ₹<span data-pay-amount>13,450</span> Securely</span></button>
-            </div>
-            <p class="pay-note">🔒 Payment is collected and <strong>verified</strong> by the payment gateway — UPI, Cards &amp; NetBanking. PCI-DSS compliant.</p>
-          </div>
-
-          <label class="check-row">
-            <input type="checkbox" id="checkout-consent">
-            <span>I consent to my health data being processed for this program under the DPDP Act, 2023, and to receive discreet delivery.</span>
-          </label>
-        </div>
-
-        <aside class="checkout-aside">
-          <div class="secure-box">
-            <span class="secure-lock">🔒</span>
-            <h3>256-bit encrypted checkout</h3>
-            <p>No record of this purchase is linked to your identity on any public ledger or courier system.</p>
-          </div>
-          <div class="secure-box">
-            <h3>What happens next</h3>
-            <ol class="secure-steps">
-              <li>Payment confirmed — receipt shows "ODW Digital Network"</li>
-              <li>Squad assigned within 24 hours</li>
-              <li>Diagnostic review call scheduled discreetly</li>
-              <li>Protocol &amp; Vitality Box ship in plain packaging</li>
-            </ol>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <!-- Payment success modal -->
-    <div class="modal-overlay" id="pay-success" aria-hidden="true" role="dialog" aria-modal="true">
-      <div class="modal-card modal-success">
-        <div class="success-ring">✓</div>
-        <h2>Payment confirmed</h2>
-        <p>Your receipt is issued under <strong>ODW Digital Network</strong>. Your multi-specialist squad will reach out within 24 hours.</p>
-        <button class="btn btn-gold btn-block" data-close-success>Done</button>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ══════════ PAGE 6 — MEDICAL PANEL ══════════ -->
+  <!-- ══════════ PAGE 4 — MEDICAL PANEL ══════════ -->
   <section class="page page-panel" data-page="panel">
 
     <header class="page-hero page-hero-narrow">
@@ -888,7 +551,6 @@
       <a href="#/" data-nav>Home</a>
       <a href="#/science" data-nav>About &amp; Science</a>
       <a href="#/diagnostic" data-nav>Diagnostic Tool</a>
-      <a href="#/programs" data-nav>Programs &amp; Pricing</a>
       <a href="#/panel" data-nav>Medical Panel</a>
     </div>
     <div>
@@ -929,7 +591,7 @@
       <div class="field-row">
         <label class="field">
           <span>Age</span>
-          <input type="number" id="c-age" min="18" max="90" placeholder="e.g. 34" inputmode="numeric">
+          <input type="number" id="c-age" min="18" max="99" placeholder="e.g. 34" inputmode="numeric">
         </label>
         <label class="field">
           <span>Phone (WhatsApp)</span>
@@ -967,7 +629,7 @@
     </div>
 
     <!-- STEP 2 · Pay ₹99 -->
-    <div class="consult-step" data-consult-step="payment" hidden>
+    <div class="consult-step" data-consult-step="payment">
       <span class="quiz-badge consult-pillar-tag" id="consult-pay-tag">Gut Health Consult</span>
       <h2>One-time consult fee</h2>
       <div class="consult-summary">
@@ -985,22 +647,30 @@
     </div>
 
     <!-- STEP 3 · Pick time (tomorrow) -->
-    <div class="consult-step" data-consult-step="timeslot" hidden>
+    <div class="consult-step" data-consult-step="timeslot">
       <div class="consult-check">✓</div>
-      <h2>Payment received — consultation confirmed</h2>
-      <p class="consult-sub">Your doctor's call is booked for <strong class="gold" id="consult-date">Tomorrow</strong>. Pick a time below.</p>
+      <h2 id="consult-timeslot-title">Payment received — consultation confirmed</h2>
+      <p class="consult-sub" id="consult-sub-line">Your doctor's call is booked for <strong class="gold" id="consult-date">Tomorrow</strong>. Pick a time below.</p>
       <div class="slot-grid" id="consult-slots"></div>
       <p class="consult-err" id="slot-err" hidden>Please choose a time slot.</p>
       <button class="btn btn-gold btn-block" id="consult-confirm-slot" disabled>Confirm my time</button>
     </div>
 
     <!-- STEP 4 · Done + SMS sent -->
-    <div class="consult-step" data-consult-step="done" hidden>
-      <div class="success-ring">✓</div>
+    <div class="consult-step" data-consult-step="done">
+      <div class="success-ring"><span>✓</span></div>
       <h2>You're all set</h2>
-      <p class="consult-sub">Confirmation sent to your phone and your care team. Show-up reminders have also been booked.</p>
-      <p class="consult-err" id="consult-wa-note" hidden></p>
-      <div class="sms-preview" id="sms-preview"></div>
+      <p class="consult-sub" id="consult-done-sub">Confirmation sent to your phone and your care team. Show-up reminders have also been booked.</p>
+      <div class="confirm-row">
+        <div class="confirm-chip">
+          <span class="confirm-chip-label">Booking ref</span>
+          <span class="confirm-chip-value" id="consult-ref">—</span>
+        </div>
+        <div class="confirm-chip">
+          <span class="confirm-chip-label">Doctor call</span>
+          <span class="confirm-chip-value" id="consult-slot">—</span>
+        </div>
+      </div>
       <button class="btn btn-gold btn-block" id="consult-done">Done</button>
     </div>
 
@@ -1014,7 +684,9 @@
     <span class="quiz-badge consult-pillar-tag">Scan &amp; Pay · UPI</span>
     <h2 id="qr-title">Scan to pay</h2>
     <p class="consult-sub">Use any UPI app (GPay / PhonePe / Paytm) and scan this code. The amount goes straight to <strong class="gold" id="qr-upi"></strong>.</p>
-    <div class="qr-box"><img id="qr-img" alt="UPI QR code" width="240" height="240"></div>
+    <div class="qr-box"><img id="qr-img" alt="UPI QR code" width="240" height="240">
+      <p class="qr-label" id="qr-deeplink" hidden>QR image unavailable — <a id="qr-deeplink-a" href="#" target="_blank" rel="noopener">open the UPI app directly</a>.</p>
+    </div>
     <div class="qr-amount-line"><span class="consult-amt-label">Amount</span><span class="consult-amt" id="qr-amount">₹99</span></div>
     <p class="qr-label" id="qr-label">OJAS Consult</p>
     <button class="btn btn-outline btn-block" id="qr-copy">Copy UPI ID</button>

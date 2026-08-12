@@ -69,31 +69,32 @@ async function waitForPageLoad() {
 async function clickQuizFlow() {
   await evalJs(`document.querySelector('[data-start-quiz]').click()`);
   await sleep(150);
-  check("quiz starts on gut screen", await evalJs(`!document.querySelector('[data-screen="gut"]').hidden`));
+  check("picker screen shows", await evalJs(`!document.querySelector('[data-screen="picker"]').hidden`));
+  check("picker continue disabled until selection", await evalJs(`document.querySelector('[data-picker-continue]').disabled`));
 
-  // Step 1: Gut — answer all 3 groups
-  await evalJs(`document.querySelectorAll('[data-screen="gut"] .seg-group').forEach(g => { const b = g.querySelector('.seg[data-v="2"]'); if (b) b.click(); });`);
+  // select Gut + Sexual only — the other two stay unassessed
+  await evalJs(`document.querySelectorAll('.cat-card').forEach(c => { if (c.dataset.cat === 'gut' || c.dataset.cat === 'sexual') c.click(); });`);
   await sleep(100);
-  check("gut Continue enabled", await evalJs(`!document.querySelector('[data-screen="gut"] [data-next-step]').disabled`));
-  await evalJs(`document.querySelector('[data-screen="gut"] [data-next-step]').click()`);
+  check("picker continue enabled", await evalJs(`!document.querySelector('[data-picker-continue]').disabled`));
+  await evalJs(`document.querySelector('[data-picker-continue]').click()`);
   await sleep(150);
-  check("advances to mind screen", await evalJs(`!document.querySelector('[data-screen="mind"]').hidden`));
+  check("first checklist is sexual", await evalJs(`!document.querySelector('[data-screen="category"]').hidden && document.getElementById('cat-badge').textContent.includes('SEXUAL')`));
+  check("next disabled before symptoms", await evalJs(`document.querySelector('[data-screen="category"] [data-next-step]').disabled`));
 
-  // Step 2: Mind — sliders already defaulted; set them higher
-  await evalJs(`document.querySelectorAll('[data-screen="mind"] input[type="range"]').forEach(s => { s.value = 8; s.dispatchEvent(new Event('input', {bubbles:true})); });`);
-  await evalJs(`document.querySelector('[data-screen="mind"] [data-next-step]').click()`);
+  // Sexual: tick ED + PME
+  await evalJs(`document.querySelectorAll('#cat-symptoms input').forEach((b, i) => { if (i < 2) b.click(); });`);
+  await sleep(100);
+  check("next enabled after symptoms", await evalJs(`!document.querySelector('[data-screen="category"] [data-next-step]').disabled`));
+  await evalJs(`document.querySelector('[data-screen="category"] [data-next-step]').click()`);
   await sleep(150);
-  check("advances to sleep screen", await evalJs(`!document.querySelector('[data-screen="sleep"]').hidden`));
+  check("second checklist is gut", await evalJs(`document.getElementById('cat-badge').textContent.includes('GUT')`));
 
-  // Step 3: Sleep
-  await evalJs(`document.querySelectorAll('[data-screen="sleep"] .seg-group').forEach(g => { const b = g.querySelector('.seg[data-v="2"]'); if (b) b.click(); });`);
-  await evalJs(`document.querySelector('[data-screen="sleep"] [data-next-step]').click()`);
-  await sleep(150);
-  check("advances to sexual screen", await evalJs(`!document.querySelector('[data-screen="sexual"]').hidden`));
-
-  // Step 4: Sexual
-  await evalJs(`document.querySelectorAll('[data-screen="sexual"] .seg-group').forEach(g => { const b = g.querySelector('.seg[data-v="2"]'); if (b) b.click(); });`);
-  await evalJs(`document.querySelector('[data-screen="sexual"] [data-submit-quiz]').click()`);
+  // Gut: tick one symptom + add a note, then submit (last category)
+  await evalJs(`document.querySelectorAll('#cat-symptoms input').forEach((b, i) => { if (i === 0) b.click(); });`);
+  await evalJs(`const n = document.getElementById('cat-note'); n.value = 'Bloating after heavy meals'; n.dispatchEvent(new Event('input', {bubbles:true}));`);
+  await sleep(100);
+  check("submit label on last checklist", await evalJs(`document.querySelector('[data-screen="category"] [data-next-step]').textContent.includes('Submit')`));
+  await evalJs(`document.querySelector('[data-screen="category"] [data-next-step]').click()`);
   await sleep(200);
   check("computing screen shows", await evalJs(`!document.querySelector('[data-screen="computing"]').hidden`));
 }
@@ -104,6 +105,9 @@ async function run() {
   await connect(t.webSocketDebuggerUrl);
   await send("Runtime.enable");
   await send("Page.enable");
+  // demo payment mode must be set BEFORE any page script runs (detectBackend
+  // probes the backend at boot) — otherwise payMode falls back to QR.
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: "window.__OJAS_TEST__ = true;" });
   await waitForPageLoad();
   await evalJs(`localStorage.clear()`);
   await send("Page.reload", { ignoreCache: true });
@@ -129,45 +133,37 @@ async function run() {
   await clickQuizFlow();
   await sleep(3400); // computing animation
   check("lands on results page", await evalJs(`location.hash === '#/results'`));
-  const bars = await evalJs(`Array.from(document.querySelectorAll('.pbar-fill')).map(f => f.style.width)`);
-  check("pillar bars animate", bars.every((w) => parseFloat(w) > 0) && bars.length === 4, bars.join(","));
+  const bars = await evalJs(`Array.from(document.querySelectorAll('.pbar:not([hidden])')).map(b => parseFloat(b.querySelector('.pbar-fill').style.width))`);
+  check("only assessed pillar bars animate", bars.length === 2 && bars.every((w) => w > 0), bars.join(","));
+  check("unassessed pillar bars hidden", await evalJs(`document.querySelectorAll('.pbar[hidden]').length === 2`));
   let litNodes = 0, hotNodes = 0;
-  for (let i = 0; i < 30 && (litNodes < 6 || hotNodes < 2); i++) {
+  for (let i = 0; i < 30 && litNodes < 3; i++) {
     await sleep(400);
     litNodes = await evalJs(`document.querySelectorAll('.graph-node.lit').length`);
     hotNodes = await evalJs(`document.querySelectorAll('.graph-node.hot').length`);
   }
-  check("domino nodes lit (chain animates)", litNodes >= 4, litNodes + " nodes lit");
-  check("hot chain endpoint lit", hotNodes >= 2, hotNodes + " hot nodes");
+  check("domino nodes lit (chain animates)", litNodes >= 3, litNodes + " nodes lit");
+  check("sexual chain endpoint hot", hotNodes >= 1, hotNodes + " hot nodes");
+  check("unassessed graph nodes hidden", await evalJs(`Array.from(document.querySelectorAll('.graph-node')).filter(n => getComputedStyle(n).display === 'none').length === 3`));
   const summaryLen = await evalJs(`document.getElementById('summary-text').innerHTML.length`);
   check("clinical summary rendered", summaryLen > 100, summaryLen + " chars");
+  check("summary notes unassessed areas", await evalJs(`document.getElementById('summary-text').textContent.includes('2 of 4')`));
 
-  // ── Pricing tracks ──
-  await evalJs(`location.hash = '#/programs'`);
+  // ── Results CTA → ₹99 consult opens with top assessed pillar ──
+  await evalJs(`document.getElementById('results-consult').click()`);
   await sleep(250);
-  check("programs page active", await evalJs(`document.querySelector('.page-programs').classList.contains('active')`));
-  check("sleep track visible by default", await evalJs(`!document.querySelector('.price-card[data-track="sleep"]').hidden`));
-  await evalJs(`document.querySelector('.track-tab[data-track="sexual"]').click()`);
+  check("results consult CTA opens modal", await evalJs(`document.getElementById('consult-modal').classList.contains('show')`));
+  check("multi-pillar CTA lists all assessed areas", await evalJs(`document.getElementById('consult-pillar-tag').textContent.includes('WELLNESS') && document.querySelectorAll('#c-problem .c-group-title').length === 2`));
+  check("multi-pillar CTA first group is sexual", await evalJs(`document.querySelector('#c-problem .c-group-title').textContent.includes('Sexual')`));
+  check("multi-pillar CTA keeps all concern options", await evalJs(`document.querySelectorAll('#c-problem .cbox').length === 10`));
+  await evalJs(`document.getElementById('consult-close').click()`);
   await sleep(150);
-  check("sexual track switches", await evalJs(`document.querySelector('.price-card[data-track="sexual"]').hidden === false && document.querySelector('.price-card[data-track="sleep"]').hidden === true`));
+  check("results consult modal closes", await evalJs(`!document.getElementById('consult-modal').classList.contains('show')`));
 
-  // ── Select plan → checkout hydration ──
-  await evalJs(`document.querySelector('[data-select-plan][data-plan="sexual-60"]').click()`);
-  await sleep(300);
-  check("plan routes to checkout", await evalJs(`location.hash === '#/checkout'`));
-  check("order title hydrated", await evalJs(`document.getElementById('order-title').textContent.includes('60-Day')`), await evalJs(`document.getElementById('order-title').textContent`));
-  check("order price hydrated", await evalJs(`document.getElementById('order-price').textContent.includes('18,450')`), await evalJs(`document.getElementById('order-price').textContent`));
-
-  // ── Payment method tabs + success modal ──
-  await evalJs(`document.querySelector('.pay-tab[data-method="card"]').click()`);
-  await sleep(100);
-  check("card panel shows", await evalJs(`!document.querySelector('[data-panel="card"]').hidden`));
-  await evalJs(`document.querySelector('[data-panel="card"] [data-pay]').click()`);
-  await sleep(200);
-  check("payment success modal shows", await evalJs(`document.getElementById('pay-success').classList.contains('show')`));
-  await evalJs(`document.querySelector('#pay-success [data-close-success]').click()`);
-  await sleep(150);
-  check("success modal closes + back home", await evalJs(`!document.getElementById('pay-success').classList.contains('show') && location.hash === '#/'`));
+  // ── Retake cleanliness: revisiting diagnostic after a finished quiz ──
+  await evalJs(`location.hash = '#/diagnostic'`);
+  await sleep(250);
+  check("revisit diagnostic resets to intro", await evalJs(`document.querySelector('[data-screen="intro"]').hidden === false && document.querySelector('[data-screen="computing"]').hidden === true`));
 
   // ── Medical panel ──
   await evalJs(`location.hash = '#/panel'`);
@@ -179,7 +175,7 @@ async function run() {
   // ── Consult booking (₹99) — test mode: UPI deep-link + WhatsApp stubbed ──
   await evalJs(`location.hash = '#/'`);
   await sleep(250);
-  await evalJs(`document.querySelector('.quad-card[data-consult="gut"]').click()`);
+  await evalJs(`document.querySelector('.quad-card[data-consult="sexual"]').click()`);
   await sleep(250);
   check("consult modal opens", await evalJs(`document.getElementById('consult-modal').classList.contains('show')`));
   await evalJs(`
@@ -188,37 +184,39 @@ async function run() {
     document.getElementById('c-phone').value = '9876543210';
     document.getElementById('c-profession').value = 'Software Engineer';
     document.getElementById('c-city').value = 'Mumbai';
-    document.querySelector('#c-problem .seg[data-v="Erectile Dysfunction (ED)"]').click();
+    document.querySelector('#c-problem .cbox[value="ED — Erectile Dysfunction"]').click();
+    document.querySelector('#c-duration .seg[data-v="1-6 months"]').click();
     document.getElementById('consult-to-pay').click();
   `);
   await sleep(250);
   check("consult advances to payment step", await evalJs(`document.querySelector('.consult-step[data-consult-step="payment"]').classList.contains('show')`));
+  check("payment step actually visible on screen", await evalJs(`window.getComputedStyle(document.querySelector('.consult-step[data-consult-step="payment"]')).display !== 'none' && document.querySelector('.consult-step[data-consult-step="payment"]').getBoundingClientRect().height > 0`));
+  check("no consult step relies on hidden attribute", await evalJs(`document.querySelectorAll('.consult-step[hidden]').length === 0`));
   await evalJs(`document.getElementById('consult-pay-btn').click()`);
   await sleep(1800);
   check("consult advances to time slot step", await evalJs(`document.querySelector('.consult-step[data-consult-step="timeslot"]').classList.contains('show')`));
+  check("time slot step actually visible on screen", await evalJs(`window.getComputedStyle(document.querySelector('.consult-step[data-consult-step="timeslot"]')).display !== 'none'`));
   await evalJs(`document.querySelector('#consult-slots .slot-btn:not(.is-taken)').click(); document.getElementById('consult-confirm-slot').click();`);
   await sleep(300);
-  check("consult done step + record saved", await evalJs(`document.querySelector('.consult-step[data-consult-step="done"]').classList.contains('show') && JSON.parse(localStorage.getItem('ojas-consultations')||'[]').length === 1`));
-  check("care-team notification note shown", await evalJs(`!document.getElementById('consult-wa-note').hidden && document.getElementById('consult-wa-note').textContent.includes('notified')`));
-  check("saved profile has all details", await evalJs(`JSON.parse(localStorage.getItem('ojas-consultations'))[0].fields.name === 'Rahul Sharma' && JSON.parse(localStorage.getItem('ojas-consultations'))[0].fields.concern === 'Erectile Dysfunction (ED)'`));
+  check("consult done step + record saved", await evalJs(`document.querySelector('.consult-step[data-consult-step="done"]').classList.contains('show') && window.getComputedStyle(document.querySelector('.consult-step[data-consult-step="done"]')).display !== 'none' && JSON.parse(localStorage.getItem('ojas-consultations')||'[]').length === 1`));
+  check("booking ref + slot chips filled", await evalJs(`document.getElementById('consult-ref').textContent.startsWith('OJ-') && document.getElementById('consult-slot').textContent.includes(' · ')`));
+  check("saved profile has all details", await evalJs(`JSON.parse(localStorage.getItem('ojas-consultations'))[0].fields.name === 'Rahul Sharma' && JSON.parse(localStorage.getItem('ojas-consultations'))[0].fields.concern === 'ED — Erectile Dysfunction'`));
 
-  // ── Checkout payment — test mode: success modal shows on first pay click (no manual confirm) ──
-  await evalJs(`document.getElementById('consult-done').click()`);
-  await sleep(150);
-  await evalJs(`document.querySelector('.track-tab[data-track="sleep"]').click()`);
-  await evalJs(`location.hash = '#/programs'`);
+  // ── Solo-pillar run: lone node centers; map styles untouched for 2-4 ──
+  await evalJs(`location.hash = '#/diagnostic'`);
   await sleep(250);
-  await evalJs(`document.querySelector('[data-select-plan][data-plan="sleep-60"]').click()`);
-  await sleep(300);
-  check("checkout routes again", await evalJs(`location.hash === '#/checkout'`));
-  await evalJs(`document.getElementById('pay-name').value = 'Rahul Sharma'; document.getElementById('pay-phone').value = '9876543210';`);
-  await evalJs(`document.querySelector('[data-panel="upi"] [data-pay]').click()`);
-  await sleep(300);
-  check("checkout success modal shows", await evalJs(`document.getElementById('pay-success').classList.contains('show')`));
-  check("no i've-paid / whatsapp buttons left", await evalJs(`!document.getElementById('consult-wa-btn') && !document.getElementById('pay-wa-btn')`));
-  await evalJs(`document.querySelector('#pay-success [data-close-success]').click()`);
+  await evalJs(`document.querySelector('[data-start-quiz]').click()`);
   await sleep(150);
-  check("checkout closes + back home", await evalJs(`!document.getElementById('pay-success').classList.contains('show') && location.hash === '#/'`));
+  await evalJs(`document.querySelector('.cat-card[data-cat="sexual"]').click(); document.querySelector('[data-picker-continue]').click();`);
+  await sleep(200);
+  await evalJs(`document.querySelector('.cbox').click(); document.querySelector('[data-next-step]').click();`);
+  await sleep(3600);
+  check("solo run lands on results", await evalJs(`location.hash === '#/results'`));
+  check("solo run applies map-solo", await evalJs(`document.getElementById('domino-graph').classList.contains('map-solo')`));
+  const soloCentered = await evalJs(`(function(){ const g = document.getElementById('domino-graph'), n = g.querySelector('.graph-node.lit'); if (!n) return false; const gr = g.getBoundingClientRect(), nr = n.getBoundingClientRect(); return Math.abs((nr.left + nr.width / 2) - (gr.left + gr.width / 2)) < 40 && Math.abs((nr.top + nr.height / 2) - (gr.top + gr.height / 2)) < 40; })()`);
+  check("solo node centered in frame", soloCentered);
+  check("solo caption shown", await evalJs(`!document.getElementById('map-solo-note').hidden && document.getElementById('map-solo-note').textContent.includes('1 area')`));
+  check("solo CTA keeps single-format form", await evalJs(`(function(){ document.getElementById('results-consult').click(); const modal = document.getElementById('consult-modal'); const ok = modal.classList.contains('show') && document.getElementById('consult-pillar-tag').textContent.includes('SEXUAL') && document.querySelectorAll('#c-problem .c-group-title').length === 0 && document.querySelectorAll('#c-problem .cbox').length === 5; document.getElementById('consult-close').click(); return ok; })()`));
 
   const passCount = results.filter((r) => r.pass).length;
   console.log(`\n${passCount}/${results.length} checks passed`);
