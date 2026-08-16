@@ -10,7 +10,7 @@ const URL = "file:///C:/tmp/ojas/index.html";
 
 function syncSite() {
   mkdirSync(DST_DIR, { recursive: true });
-  for (const f of ["index.html", "script.js", "styles.css", "ojaslogo.jpeg"]) {
+  for (const f of ["index.html", "script.js", "styles.css", "ojaslogo1.svg"]) {
     copyFileSync(`${SRC_DIR}/${f}`, `${DST_DIR}/${f}`);
   }
 }
