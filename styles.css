@@ -88,10 +88,11 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid var(--line); border-radius: 10px;
   background: radial-gradient(circle at 30% 25%, rgba(212,175,55,0.16), transparent 70%);
 }
-.brand-logo { height: 80px; width: auto; border-radius: 10px; display: block; }
-.site-footer .brand-logo { height: 70px; }
-.brand-text { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.18em; color: var(--white); display: flex; flex-direction: column; line-height: 1.05; }
-.brand-sub { font-family: var(--font-body); font-size: 9px; letter-spacing: 0.34em; color: var(--muted); text-transform: uppercase; margin-top: 3px; }
+.brand-text { font-family: var(--font-display); font-size: 28px; letter-spacing: 0.18em; color: var(--gold); display: flex; flex-direction: column; line-height: 1.05; }
+.brand-sub { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.34em; color: var(--muted); text-transform: uppercase; margin-top: 3px; }
+.brand-tag { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.26em; color: var(--muted); margin-top: 3px; }
+.site-footer .brand-text { font-size: 24px; }
+.site-footer .brand-sub, .site-footer .brand-tag { font-size: 9px; }
 .site-nav { display: flex; align-items: center; gap: 26px; }
 .site-nav > a:not(.btn) { color: var(--body); font-size: 14.5px; font-weight: 500; position: relative; padding: 6px 0; }
 .site-nav > a:not(.btn)::after {
@@ -315,7 +316,9 @@ button { font-family: inherit; cursor: pointer; }
 .modal-overlay.show { opacity: 1; visibility: visible; }
 .modal-card { width: min(520px, 100%); background: linear-gradient(170deg, var(--slate) 0%, var(--midnight-2) 100%); border: 1px solid var(--gold); border-radius: 18px; padding: 38px 34px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); transform: translateY(14px); transition: transform 0.3s ease; }
 .modal-overlay.show .modal-card { transform: none; }
-.modal-emblem { width: 156px; height: auto; display: block; margin: 0 auto 14px; border-radius: 12px; }
+.modal-emblem { text-align: center; margin-bottom: 18px; }
+.modal-emblem .brand-text { font-size: 34px; align-items: center; }
+.modal-emblem .brand-sub, .modal-emblem .brand-tag { text-align: center; }
 .modal-card h2 { font-size: 24px; margin-bottom: 14px; text-align: center; }
 .modal-card > p { font-size: 14px; color: var(--muted); margin-bottom: 18px; text-align: center; }
 .consent-points { list-style: none; margin-bottom: 20px; display: grid; gap: 9px; }
